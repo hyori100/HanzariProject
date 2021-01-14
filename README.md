@@ -1,4 +1,6 @@
-# 한자리 - 한글과컴퓨터 IPP 자리배치 프로그램   
+# 한자리 - 한글과컴퓨터 IPP 자리배치 프로그램  
+
+## 프로젝트 Frontend 팀원명
 - 마효리 [hyori100의 공간](https://github.com/hyori100)
 - 노윤지 [yunji98의 공간](https://github.com/yunji98)
 - 최유진 [cyj2857의 공간](https://github.com/cyj2857)
