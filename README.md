@@ -30,7 +30,7 @@
 ```
 RESTful API를 호출하여 JSON형식으로 필요한 정보를 알맞게 활용하였습니다. 
 ```
-* Fabric.js 라이브러리를 사용하여 Canvas 구현
+[*신호등 인식과 사물 거리 인식*](https://github.com/Sangmeebee/Tensorflow-ObjectDetectionApi)
 ```
 객체 집합이나 사용자 인터랙션을 지원하는 Fabric.js 라이브러리를 사용하여 도면화면으로 보여지는 Canvas를 구현하였습니다.
 ```
