@@ -26,7 +26,7 @@
 ```
 프레임워크로 Vue.js를 사용하여 구현된 프로그램입니다. 
 ```
-* RESTful API 이용
+* [**RESTful API 이용**](https://github.com/hyori100/HanzariProject/tree/master/frontendProject/src/store/modules)
 ```
 RESTful API를 호출하여 JSON형식으로 필요한 정보를 알맞게 활용하였습니다. 
 ```
