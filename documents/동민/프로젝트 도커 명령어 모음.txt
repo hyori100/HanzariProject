@@ -1,0 +1,64 @@
+MinIO 명령어
+
+docker pull minio/minio
+docker run -p 9000:9000 --name hanzari_minio -v C:\minio:/data -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" minio/minio server /data
+
+#디렉토리도 생성해주기!
+#호스트 OS의 설치경로 및 container filesystem의 /data 디렉토리를 연결시켜주는 작업을 해야기에 ~경로:/data라고 써준다.
+#KEY값은 프로젝트에 맞춰 추후 변경
+#실행 후 브라우저에서 MinIO 서버 접속 후 Create bucket을 해서 bucket을 생성하거나 연결된 호스트 OS의 경로에서 bucket을 생성해도 된다.
+
+--------------------------------------------------
+
+MariaDB 명령어
+
+한글 입력 되게 컨테이너 bash 접속
+docker container exec -it -e LC_ALL=C.UTF-8 mariadb bash
+컨테이너 안의 mariadb 실행
+mariadb -u root -p
+비밀번호 입력
+데이터베이스 선택
+use hanzari
+
+bash 한글 설정 보기 locale
+mariadb 한글 설정 보기 show variables like 'c%';
+
+--------------------------------------------------
+
+BusyBox bash에는 접근이 안되는데 기본 shell이 안깔려있다고한다.
+
+볼륨 공유를 위한 컨테이너 생성(도커파일있는 디렉토리로 이동)
+docker image build -t volume_container:latest .
+이미지 컨테이너 런
+docker container run --name volume_container -d volume_container:latest
+
+볼륨 연결해서 mariadb 이미지 컨테이너화
+docker run -p 3306:3306 --name hanzaridb1 -e MYSQL_ROOT_PASSWORD=root --volumes-from=volume-container -d mariadb:latest
+
+docker run -p 3307:3306 --name hanzaridb2 -e MYSQL_ROOT_PASSWORD=root --volumes-from=volume-container -d mariadb:latest
+
+컨테이너 bash 접속(한글 설정 안주는 법을 위의 포트번호, 컨테이너 이름, mariadb 비밀번호, 공유 볼륨 등의 설정과 함께 도커파일로 만들기)
+docker exec -it -e LC_ALL=C.UTF-8 hanzaridb1 bash
+
+공유 볼륨 컨테이너를 만들어 볼륨이 공유는 되지만 해당 공유 볼륨 컨테이너를 이미지화 했을 때는 또 기존의 데이터들이 사라진다.
+
+--------------------------------------------------
+
+볼륨 공유 도커파일
+FROM busybox
+
+VOLUME /var/lib/mysql
+VOLUME /var/log
+
+MariaDB 도커파일
+FROM hanzaridb:latest
+
+#Port forwarding
+EXPOSE 3306:3306
+
+#Set the locale
+RUN apt-get update
+RUN apt-get install locales
+ENV LANG ko_KR.UTF-8
+ENV LANGUAGE ko_KR.UTF-8
+RUN update-locale LANG=ko_KR.UTF-8
