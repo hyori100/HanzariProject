@@ -1,40 +1,39 @@
 <template>
   <div id="assignSeatsScreen">
-    <v-toolbar color="black" dark>
-      <v-toolbar-title v-if="this.currentSelectedFloorObject"
-        >{{ currentSelectedFloorObject.floorName }}
-        {{ this.$t("floor") }}</v-toolbar-title
+    <v-toolbar id="toolbar" color="#2c4f91" dark>
+      <v-btn
+        v-if="saveStatus != 'saving' && saveStatus != 'done'"
+        :disabled="saveStatus != 'ableSave'"
+        @click="clickSaveBtn"
+        text
       >
+        <v-icon size="30px">save</v-icon>
+      </v-btn>
+      <v-btn v-if="saveStatus === 'saving'" text>
+        <v-icon size="30px">autorenew</v-icon>{{ this.$t("btnSaving") }}
+      </v-btn>
+      <v-btn v-if="saveStatus === 'done'" text>
+        <v-icon size="30px">done</v-icon>{{ this.$t("btnSaveDone") }}
+      </v-btn>
       <v-spacer></v-spacer>
-      <v-toolbar-items class="hidden-sm-and-down">
-        <v-icon v-if="lockStatus === false" large>lock</v-icon>
-        <v-icon v-if="lockStatus === true" large>no_encryption</v-icon>
+      <h3>
+        <span>{{ $store.state.buildingStore.building.buildingName }}</span>
+      </h3>
+      <v-spacer></v-spacer>
+      <v-toolbar-items id="toolBarItems" class="hidden-sm-and-down">
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-container fluid v-bind="attrs" v-on="on">
-              <v-switch
-                v-model="lockStatus"
-                color="white"
-                inset
-              ></v-switch> </v-container
-          ></template>
-          <span>{{ this.$t("tooltipPanMode") }}</span>
-        </v-tooltip>
-
-        <v-divider vertical></v-divider>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn text v-bind="attrs" v-on="on" @click="clickdeleteAllBtn">
-              <v-icon large>delete</v-icon>
+            <v-btn text v-bind="attrs" v-on="on" @click="captureBtn">
+              <v-icon size="30px">photo</v-icon>
             </v-btn>
           </template>
-          <span>{{ this.$t("tooltipDeleteAllBtn") }}</span>
+          <span>{{ this.$t("tooltipCaptureBtn") }}</span>
         </v-tooltip>
 
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn text v-bind="attrs" v-on="on" @click="clickPrintBtn">
-              <v-icon large>print</v-icon>
+              <v-icon size="30px">print</v-icon>
             </v-btn></template
           >
           <span>{{ this.$t("tooltipPrintBtn") }}</span>
@@ -52,7 +51,7 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on: onTooltip }">
                 <v-btn text v-on="{ ...onMenu, ...onTooltip }"
-                  ><v-icon large>cloud_download</v-icon></v-btn
+                  ><v-icon size="30px">cloud_download</v-icon></v-btn
                 >
               </template>
               <span v-html="csvTooltipText"></span>
@@ -68,116 +67,47 @@
             </v-list-item>
           </v-list>
         </v-menu>
-
-        <v-menu bottom rounded offset-y>
-          <template v-slot:activator="{ on: onCard }">
-            <v-btn text v-on="onCard">
-              <v-icon large>settings_applications</v-icon>
-            </v-btn>
-          </template>
-          <v-card min-width="250px">
-            <v-list-item-content class="justify-center">
-              <div class="mx-auto text-center">
-                <v-row>
-                  <v-col cols="12" sm="3"
-                    ><v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon large v-bind="attrs" v-on="on">preview</v-icon>
-                      </template>
-                      <span>{{ viewSeatInfiTooltipText }}</span>
-                    </v-tooltip> </v-col
-                  ><v-col cols="12" sm="8">
-                    <v-radio-group
-                      @change="viewSeatInfo"
-                      v-model="viewSeatStatus"
-                      row
-                    >
-                      <v-radio
-                        :label="$t('contextMenuViewSeatAboutEmployeeName')"
-                        :value="0"
-                      ></v-radio>
-                      <v-radio
-                        :label="$t('contextMenuViewSeatAboutNumber')"
-                        :value="1"
-                      ></v-radio>
-                      <v-radio
-                        :label="$t('contextMenuViewSeatAboutDepartment')"
-                        :value="2"
-                      ></v-radio>
-                      <v-radio
-                        :label="$t('contextMenuViewSeatAboutName')"
-                        :value="3"
-                      ></v-radio> </v-radio-group></v-col
-                ></v-row>
-
-                <v-divider class="mx-4"></v-divider>
-                <v-row>
-                  <v-col cols="12" sm="3"
-                    ><v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-icon large v-bind="attrs" v-on="on"
-                          >opacity</v-icon
-                        ></template
-                      >
-                      <span>{{ this.$t("tooltipSetOpacity") }}</span>
-                    </v-tooltip> </v-col
-                  ><v-col cols="12" sm="7">
-                    <v-slider
-                      v-model="seatOpacity"
-                      @change="changeSeatOpacity"
-                      :step="0.25"
-                      :min="0"
-                      :max="1"
-                      class="align-center"
-                    ></v-slider
-                  ></v-col>
-                </v-row>
-              </div>
-            </v-list-item-content>
-          </v-card>
-        </v-menu>
       </v-toolbar-items>
     </v-toolbar>
-    <div id="toolBarItems">
-      <v-toolbar-items>
-        <v-btn
-          color="blue"
-          v-if="zoomStatus"
-          v-on:click="zoomStatus = false"
-          @click="clickResetToRatioBtn"
-          text
-        >
-          <v-icon color="blue" x-large>zoom_out</v-icon>
-          {{ this.$t("resetRatio") }}
-        </v-btn>
-        <v-spacer></v-spacer>
-
-        <v-spacer></v-spacer>
-        <v-btn
-          v-if="saveStatus === 'ableSave'"
-          @click="clickSaveBtn"
-          color="red"
-          text
-        >
-          <v-icon color="red" x-large>save</v-icon>{{ this.$t("btnSave") }}
-        </v-btn>
-        <v-btn v-else-if="saveStatus === 'saving'" color="red" text>
-          <v-icon color="red" x-large>autorenew</v-icon
-          >{{ this.$t("btnSaving") }}
-        </v-btn>
-        <v-btn v-else-if="saveStatus === 'done'" color="red" text>
-          <v-icon color="red" x-large>done</v-icon>{{ this.$t("btnSaveDone") }}
-        </v-btn>
-      </v-toolbar-items>
+    <div id="canvas-container">
+      <canvas
+        ref="canvas"
+        class="canvas"
+        id="canvas"
+        style="text-align: center"
+      ></canvas>
+      <v-btn
+        id="zoomInButton"
+        v-on:click="zoomStatus = false"
+        @click="clickResetToRatioBtn"
+        fab
+        small
+      >
+        <v-icon medium>add</v-icon>
+      </v-btn>
+      <v-btn
+        id="zoomOutButton"
+        v-on:click="zoomStatus = false"
+        @click="clickResetToRatioBtn"
+        fab
+        small
+      >
+        <v-icon medium>remove</v-icon>
+      </v-btn>
+      <v-btn
+        id="resetZoomButton"
+        v-on:click="zoomStatus = false"
+        @click="clickResetToRatioBtn"
+        fab
+        small
+      >
+        <v-icon medium>my_location</v-icon>
+      </v-btn>
+      <v-btn id="lockButton" @click="clickLockBtn" fab small>
+        <v-icon v-if="lockStatus === false" medium>lock</v-icon>
+        <v-icon v-if="lockStatus === true" medium>no_encryption</v-icon>
+      </v-btn>
     </div>
-    <canvas
-      ref="canvas"
-      class="canvas"
-      id="canvas"
-      height="770px"
-      width="1153px"
-      style="text-align: center"
-    ></canvas>
     <v-menu
       v-model="contextMenuStatus"
       :position-x="contextMenuXLocation"
@@ -209,6 +139,8 @@
 </template>
 
 <script>
+import html2canvas from "html2canvas";
+//import jsPDF from "jspdf";
 import { eventBus } from "../main.js";
 import axios from "axios";
 import { refreshToken } from "@/refreshToken.js";
@@ -260,6 +192,9 @@ export default {
       allDepartmentMap: null, //부서이름, 부서아이디, 부서색상값을 저장할 수 있는 Map <FloorId, DepartmentObject>
       allSeatMap: null, //자리 Map <FloorId, 자리리스트>
       eachEmployeeSeatMap: null, //각 사원의 자리 Map <EmployeeId, 자리리스트>
+
+      //캔버스 이미지
+      allCanvasImageMap: null,
 
       //컨택스트 메뉴
       contextMenuStatus: false,
@@ -319,7 +254,9 @@ export default {
     if (this.allDepartmentMap == null) {
       this.allDepartmentMap = new Map();
     }
-
+    if (this.allCanvasImageMap == null) {
+      this.allCanvasImageMap = new Map();
+    }
     if (this.allFloorList && this.allFloorList.length) {
       this.currentSelectedFloorObject = this.allFloorList[
         this.allFloorList.length - 1
@@ -351,6 +288,10 @@ export default {
       this.changeSeatSize(seatWidth, seatHeight);
     });
 
+    eventBus.$on("sendDragSeatSize", (seatDragWidth, seatDragHeight) => {
+      this.changeDragSeatSize(seatDragWidth, seatDragHeight);
+    });
+
     //층의 이름이 변경될시 화면에 표출되는 string값을 바꾸기 위한 event
     eventBus.$on("pushChangedCurrentFloorName", (changedFloorName) => {
       this.currentSelectedFloorObject.floorName = changedFloorName;
@@ -363,7 +304,15 @@ export default {
 
     //만들고자 하는 공석의 개수를 받기 위한 event
     eventBus.$on("pushSelectedNumberOfAddSeat", (numberOfAddSeat) => {
+      console.log(numberOfAddSeat);
       this.numberOfAddSeat = numberOfAddSeat;
+    });
+
+    //현재 층의 모든 자리를 삭제하기 위한 상태값(유)을 받기 위한 event
+    eventBus.$on("pushDeleteAllSeatStatus", (deleteAllSeatStatus) => {
+      if (deleteAllSeatStatus) {
+        this.clickdeleteAllBtn();
+      }
     });
 
     //공석에 사원을 매핑하고자 함수를 호출하기 위한 event
@@ -382,31 +331,41 @@ export default {
 
       // 선택된 자리가 없다면 경고창
       if (!this.floorCanvas.getActiveObject()) {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertMoveSeatToAnotherFloor"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            color: "red",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       } // 선택된 층에 이미지가 없다면 경고창
       else if (this.allImageMap.get(floorId).imgPath === "") {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertNoBackgroundImageOfTryToChangeFloor"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       } else if (moveFloorName === "") {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertNoFloorNameOfTryToChangeFloor"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       } else if (
@@ -467,12 +426,15 @@ export default {
               //console.log("cancel");
             });
         } else {
-          this.$notify({
-            group: "notifyApp",
-            type: "warn",
-            duration: 5000,
+          this.$notice.info({
             title: this.$i18n.t("alertMoveSeatToAnotherFloor"),
-            ignoreDuplicates: true,
+            styles: {
+              width: "400px",
+              marginLeft: "-815px",
+              top: "118px",
+              backgroundColor: "#2a88bd",
+            },
+            duration: 5,
           });
           return;
         }
@@ -484,12 +446,15 @@ export default {
       if (this.floorCanvas.getActiveObject()) {
         this.changeSeatToVacant();
       } else {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertNoSelectedSeat"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       }
@@ -509,6 +474,18 @@ export default {
       );
     });
 
+    //자리 상세정보 라디오에서 선택한 값을 받기 위한 event
+    eventBus.$on("pushViewSeatInfo", (viewSeatStatus) => {
+      this.viewSeatStatus = viewSeatStatus;
+      this.viewSeatInfo();
+    });
+
+    //자리 불투명도 값을 받기 위한 event
+    eventBus.$on("pushSeatOpacity", (seatOpacity) => {
+      this.seatOpacity = seatOpacity;
+      this.changeSeatOpacity();
+    });
+
     //자리 하이라이트 하는 함수를 호출하기 위한 event
     eventBus.$on("showSeatHighlight", (seatObject) => {
       this.showSeatHighlight(seatObject);
@@ -517,6 +494,11 @@ export default {
     //자리 하이라이트 하는 함수를 호출하기 위한 event
     eventBus.$on("showDepartmentSeatHighlight", (departmentObjectId) => {
       this.showDepartmentSeatHighlight(departmentObjectId);
+    });
+
+    //자리 채우기색(부서색)을 변경하는 함수를 호출하기 위한 event
+    eventBus.$on("changeDepartmentColor", (departmentObjectId) => {
+      this.changeDepartmentColor(departmentObjectId);
     });
 
     //삭제된 층의 리스트를 받기 위한 event
@@ -587,7 +569,23 @@ export default {
           enableRetinaScaling: false,
         });
 
+        let toolBarItemsHeight = document
+          .getElementById("toolbar")
+          .getBoundingClientRect().height;
+
+        let originalAssignSeatsScreenWidth = document
+          .getElementById("toolbar")
+          .getBoundingClientRect().width;
+        let originalAssignSeatsScreenHeight =
+          window.innerHeight - toolBarItemsHeight - 30;
+
+        this.floorCanvas.setHeight(originalAssignSeatsScreenHeight);
+        this.floorCanvas.setWidth(originalAssignSeatsScreenWidth - 450);
+        console.log(originalAssignSeatsScreenHeight);
+        console.log(originalAssignSeatsScreenWidth - 450);
+
         this.setMouseWheel(); //마우스 휠과 Ctrl 키로 zoom in/out
+        this.setLeftDragEventForFloorCanvas(); //왼쪽 마우스 드래그 이벤트 함수
         this.setDragDropEventForAddVacantSeat();
         this.setWhenObjectModified();
         this.addKeyEventListener();
@@ -595,62 +593,13 @@ export default {
         this.whenResizingWindow(); //브라우저 창의 크기를 조절할때 (캔버스 확장/축소됨)
 
         this.floorCanvas.on("object:moving", function (e) {
-          console.log("object:moving");
-
-          //도형 움직이면 도면이 잠김
+          //자리 움직이면 자동으로 도면 움직임이 잠김
           this.lockStatus = false;
           this.moveStatus = true;
-
-          let obj = e.target;
-          // if object is too big ignore
-          if (
-            obj.currentHeight > obj.canvas.height ||
-            obj.currentWidth > obj.canvas.width
-          ) {
-            return;
-          }
-          obj.setCoords();
-          // top-left  corner
-          if (obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0) {
-            obj.top = Math.max(obj.top, obj.top - obj.getBoundingRect().top);
-            obj.left = Math.max(
-              obj.left,
-              obj.left - obj.getBoundingRect().left
-            );
-          }
-          // bot-right corner
-          if (
-            obj.getBoundingRect().top + obj.getBoundingRect().height >
-              obj.canvas.height ||
-            obj.getBoundingRect().left + obj.getBoundingRect().width >
-              obj.canvas.width
-          ) {
-            obj.top = Math.min(
-              obj.top,
-              obj.canvas.height -
-                obj.getBoundingRect().height +
-                obj.top -
-                obj.getBoundingRect().top
-            );
-            obj.left = Math.min(
-              obj.left,
-              obj.canvas.width -
-                obj.getBoundingRect().width +
-                obj.left -
-                obj.getBoundingRect().left
-            );
-          }
         });
 
-        let left1 = 0;
-        let top1 = 0;
-        let scale1x = 0;
-        let scale1y = 0;
-        let width1 = 0;
-        let height1 = 0;
-
         this.floorCanvas.on("object:scaling", function (e) {
-          //자리 크기가 변화되면 도면이 잠김
+          //자리 크기가 변화되면 자동으로 도면 움직임이 잠김
           this.lockStatus = false;
           this.moveStatus = true;
 
@@ -665,28 +614,6 @@ export default {
           textObject.set("scaleY", scaleY);
 
           obj.setCoords();
-
-          let brNew = obj.getBoundingRect();
-          if (
-            brNew.width + brNew.left >= obj.canvas.width ||
-            brNew.height + brNew.top >= obj.canvas.height ||
-            brNew.left < 0 ||
-            brNew.top < 0
-          ) {
-            obj.left = left1;
-            obj.top = top1;
-            obj.scaleX = scale1x;
-            obj.scaleY = scale1y;
-            obj.width = width1;
-            obj.height = height1;
-          } else {
-            left1 = obj.left;
-            top1 = obj.top;
-            scale1x = obj.scaleX;
-            scale1y = obj.scaleY;
-            width1 = obj.width;
-            height1 = obj.height;
-          }
         });
       }
     },
@@ -723,52 +650,40 @@ export default {
           .getElementById("assignSeatsScreen")
           .getBoundingClientRect().top;
         let toolBarItemsHeight = document
-          .getElementById("toolBarItems")
+          .getElementById("toolbar")
           .getBoundingClientRect().height;
 
-        let zoom;
-
-        if (1153 < assignSeatsScreenWidth) {
-          zoom =
-            (window.innerHeight -
-              toolBarItemsHeight -
-              toolBarItemsHeight -
-              assignSeatsScreenTop) /
-            770;
-
-          if (zoom * 1153 > assignSeatsScreenWidth) {
-            zoom = assignSeatsScreenWidth / 1153;
-          }
-        } else {
-          zoom = assignSeatsScreenWidth / 1153;
-
-          if (
-            zoom * 770 >
-            window.innerHeight -
-              toolBarItemsHeight -
-              toolBarItemsHeight -
-              assignSeatsScreenTop
-          ) {
-            zoom =
-              (window.innerHeight -
-                toolBarItemsHeight -
-                toolBarItemsHeight -
-                assignSeatsScreenTop) /
-              770;
-          }
-        }
-        this.floorCanvas.setZoom(zoom);
-
-        /*this.floorCanvas.setHeight(
-          window.innerHeight -
-            toolBarItemsHeight -
-            toolBarItemsHeight -
-            assignSeatsScreenTop
-        );*/
-        this.floorCanvas.setHeight(770);
+        this.floorCanvas.setHeight(
+          window.innerHeight - toolBarItemsHeight - 30
+        );
         this.floorCanvas.setWidth(assignSeatsScreenWidth);
+
+        // let zoom;
+
+        // if (1664.444580078125 < assignSeatsScreenWidth) {
+        //   zoom =
+        //     (window.innerHeight - toolBarItemsHeight - 30) /
+        //     947.0069427490234;
+
+        //   if (zoom * 1664.444580078125 > assignSeatsScreenWidth) {
+        //     zoom = assignSeatsScreenWidth / 1664.444580078125;
+        //   }
+        // } else {
+        //   zoom = assignSeatsScreenWidth / 1664.444580078125;
+
+        //   if (
+        //     zoom * 947.0069427490234 >
+        //     window.innerHeight - toolBarItemsHeight - 30
+        //   ) {
+        //     zoom =
+        //       (window.innerHeight - toolBarItemsHeight - 30) /
+        //       947.0069427490234;
+        //   }
+        // }
+        // this.floorCanvas.setZoom(zoom);
+
         this.floorCanvas.requestRenderAll();
-        this.floorCanvas.calcOffset();
+        //this.floorCanvas.calcOffset();
       };
     },
     setMouseWheel() {
@@ -779,11 +694,10 @@ export default {
         let evt = opt.e;
         let deltaY = evt.deltaY;
         this.zoom = this.floorCanvas.getZoom();
-        this.zoom = this.zoom - deltaY / 300;
-
         if (evt.ctrlKey === true) {
-          if (this.zoom > 10) this.zoom = 10;
-          else if (this.zoom < 1) this.zoom = 1;
+          this.zoom = this.zoom - deltaY / 1000;
+          //if (this.zoom > 10) this.zoom = 10;
+          //else if (this.zoom < 1) this.zoom = 1;
           //zoom in and out
           this.floorCanvas.zoomToPoint(
             new fabric.Point(evt.offsetX, evt.offsetY),
@@ -792,14 +706,57 @@ export default {
           this.zoomStatus = true;
         } else {
           //reset canvas ratio
-          this.floorCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
-          this.zoomStatus = false;
-          this.lockStatus = false;
-          this.zoom = 1;
-          this.floorCanvas.selection = true;
+          // this.floorCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+          // this.zoomStatus = false;
+          // this.lockStatus = false;
+          // this.zoom = 1;
+          // this.floorCanvas.selection = true;
         }
         opt.e.preventDefault();
         opt.e.stopPropagation();
+      });
+    },
+    setLeftDragEventForFloorCanvas() {
+      let dragStatus = false;
+
+      this.floorCanvas.on("mouse:down", (event) => {
+        if (event.button === 1) {
+          dragStatus = true;
+        }
+        dragStatus = false;
+      });
+
+      this.floorCanvas.on("mouse:move", (event) => {
+        if (event.button === 1) {
+          dragStatus = true;
+        }
+      });
+
+      this.floorCanvas.on("mouse:up", (event) => {
+        let multiSelectionObjectWidthList = [];
+        let multiSelectionObjectHeightList = [];
+        if (dragStatus) {
+          if (event.button === 1) {
+            if (this.floorCanvas.getActiveObjects().length > 0) {
+              this.floorCanvas.getActiveObjects().forEach((obj) => {
+                console.log(obj);
+                multiSelectionObjectWidthList.push(obj.get("width") + 1);
+                multiSelectionObjectHeightList.push(obj.get("height") + 1);
+              });
+              console.log(multiSelectionObjectWidthList);
+
+              eventBus.$emit(
+                "sendDragMultipleSeatList",
+                multiSelectionObjectWidthList,
+                multiSelectionObjectHeightList
+              );
+              eventBus.$emit(
+                "pushManageSeatTabOfSelectedSeatsComponentStatus",
+                true
+              );
+            }
+          }
+        }
       });
     },
     setDragDropEventForAddVacantSeat() {
@@ -844,12 +801,15 @@ export default {
           if (canDraw) {
             //자리를 생성하면 도면이 잠김
             if (this.lockStatus === true) {
-              this.$notify({
-                group: "notifyApp",
-                type: "warn",
-                duration: 5000,
+              this.$notice.info({
                 title: this.$i18n.t("alertCanvasLockStatus"),
-                ignoreDuplicates: true,
+                styles: {
+                  width: "400px",
+                  marginLeft: "-815px",
+                  top: "118px",
+                  backgroundColor: "#2a88bd",
+                },
+                duration: 5,
               });
               this.lockStatus = false;
               this.floorCanvas.selection = true;
@@ -901,14 +861,16 @@ export default {
             if (
               !this.allImageMap.get(this.currentSelectedFloorObject.floorId)
             ) {
-              this.$notify({
-                group: "notifyApp",
-                type: "warn",
-                duration: 5000,
+              this.$notice.info({
                 title: this.$i18n.t("alertNoBackgroundImage"),
-                ignoreDuplicates: true,
+                styles: {
+                  width: "400px",
+                  marginLeft: "-815px",
+                  top: "118px",
+                  backgroundColor: "#2a88bd",
+                },
+                duration: 5,
               });
-
               this.floorCanvas.getObjects().forEach((obj) => {
                 if (rectangle === obj) {
                   this.floorCanvas.remove(obj);
@@ -916,12 +878,15 @@ export default {
               });
               return;
             } else if (this.currentSelectedFloorObject.floorName == "") {
-              this.$notify({
-                group: "notifyApp",
-                type: "warn",
-                duration: 5000,
+              this.$notice.info({
                 title: this.$i18n.t("alertNoFloorName"),
-                ignoreDuplicates: true,
+                styles: {
+                  width: "400px",
+                  marginLeft: "-815px",
+                  top: "118px",
+                  backgroundColor: "#2a88bd",
+                },
+                duration: 5,
               });
               this.floorCanvas.getObjects().forEach((obj) => {
                 if (rectangle === obj) {
@@ -1015,6 +980,11 @@ export default {
             activeSelection = null;
 
             this.floorCanvas.discardActiveObject();
+            eventBus.$emit(
+              "pushManageSeatTabOfSelectedSeatsComponentStatus",
+              false
+            );
+            eventBus.$emit("pushMappingEmployeeComponentStatus", false);
           }
         }
       });
@@ -1118,6 +1088,9 @@ export default {
             this.pasteSelectedSeat();
             break;
           case 65:
+            //browser의 콘텐츠 전체선택 block
+            event.preventDefault();
+            event.stopPropagation();
             this.selectAllSeat();
             break;
         }
@@ -1146,6 +1119,35 @@ export default {
       this.floorCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
       this.lockStatus = false;
       this.floorCanvas.selection = true;
+
+      if (
+        this.allImageMap.get(this.currentSelectedFloorObject.floorId) != null
+      ) {
+        let typeCheck = this.allImageMap.get(
+          this.currentSelectedFloorObject.floorId
+        ).imgPath;
+
+        if (typeof typeCheck === "string") {
+          this.loadImageDBFile(
+            this.allImageMap.get(this.currentSelectedFloorObject.floorId)
+              .imgPath,
+            this.allImageMap.get(this.currentSelectedFloorObject.floorId)
+              .imgType
+          );
+        } else {
+          this.loadImageFile(
+            this.allImageMap.get(this.currentSelectedFloorObject.floorId)
+              .imgPath
+          );
+        }
+      }
+    },
+    clickLockBtn() {
+      if (!this.lockStatus) {
+        this.lockStatus = true;
+      } else {
+        this.lockStatus = false;
+      }
     },
     changeFloor() {
       this.floorCanvas
@@ -1194,6 +1196,15 @@ export default {
           }
           eventBus.$emit("pushAllSeatMap", this.allSeatMap);
         }
+
+        //캔버스 이미지 Map 저장하기
+        let dataUrl = document.getElementById("canvas").toDataURL();
+        dataUrl = dataUrl.replace("data:image/png;base64,", "");
+        //console.log(dataUrl);
+        this.allCanvasImageMap.set(
+          this.currentSelectedFloorObject.floorId,
+          dataUrl
+        );
       } else if (
         this.allImageMap.get(this.currentSelectedFloorObject.floorId) == null
       ) {
@@ -1485,6 +1496,99 @@ export default {
       newDepartmentObject.departmentColor = departmentColor; //부서 색상
       return newDepartmentObject;
     },
+    changeDepartmentColor(departmentObjectId) {
+      //현재층의 부서객체 리스트와 다른층들의 부서객체 리스트에서
+      //바꾸고자 하는 부서아이디에 대하여 랜덤 색상으로 color필드를 바꿔주기
+      let currentFloorDepartmentObjectList = this.allDepartmentMap.get(
+        this.currentSelectedFloorObject.floorId
+      );
+      let changedDepartmentColor = null;
+
+      const idx = currentFloorDepartmentObjectList.findIndex(
+        (departmentObject) => {
+          return departmentObject.departmentId === departmentObjectId;
+        }
+      );
+      if (idx > -1) {
+        let departmentObject = currentFloorDepartmentObjectList[idx];
+        departmentObject.departmentColor = this.hexGenerator();
+        changedDepartmentColor = departmentObject.departmentColor;
+      }
+
+      let keys = [];
+      keys = Array.from(this.allDepartmentMap.keys());
+      let indexOfCurrentSelectedFloorObject = keys.indexOf(
+        this.currentSelectedFloorObject.floorId
+      );
+      keys.splice(indexOfCurrentSelectedFloorObject, 1);
+
+      for (let i = 0; i < keys.length; i++) {
+        let departmentMapKey = keys[i];
+        let eachFloorDepartmentObjectList = this.allDepartmentMap.get(
+          departmentMapKey
+        );
+
+        const idx = eachFloorDepartmentObjectList.findIndex(
+          (departmentObject) => {
+            return departmentObject.departmentId === departmentObjectId;
+          }
+        );
+        if (idx > -1) {
+          let departmentObject = eachFloorDepartmentObjectList[idx];
+          departmentObject.departmentColor = changedDepartmentColor;
+        }
+      }
+      eventBus.$emit("pushDepartmentMap", this.allDepartmentMap);
+
+      //화면에 다시 렌더링 하기 (모든 층에 대하여 자리 채우기색상 변경하기)
+      for (let i = 0; i < this.allSeatMap.size; i++) {
+        let keys = [];
+        keys = Array.from(this.allDepartmentMap.keys());
+
+        let eachFloorSeatList = this.getEachFloorSeatList(keys[i]);
+        let changedDepartmentColorSeatList = [];
+        for (let i = 0; i < eachFloorSeatList.length; i++) {
+          let group = eachFloorSeatList[i];
+          let asObject = group.toObject([
+            "employeeId",
+            "floorId",
+            "seatId",
+            "employeeDepartment",
+            "employeeDepartmentId",
+          ]);
+
+          let objectDepartmentId = asObject.employeeDepartmentId;
+          if (departmentObjectId === objectDepartmentId) {
+            changedDepartmentColorSeatList.push(group);
+          }
+        }
+        changedDepartmentColorSeatList.forEach((seat) => {
+          let asObject = seat.toObject([
+            "employeeId",
+            "floorId",
+            "seatId",
+            "employeeDepartment",
+            "employeeDepartmentId",
+          ]);
+          let newEmployeeObject = {};
+          newEmployeeObject.departmentId = asObject.employeeDepartmentId;
+          newEmployeeObject.department = asObject.employeeDepartment;
+          seat
+            .item(0)
+            .set("fill", this.getDepartmentObjectColor(newEmployeeObject));
+          seat
+            .item(1)
+            .set(
+              "fill",
+              this.getSeatTextColor(
+                this.getDepartmentObjectColor(newEmployeeObject)
+              )
+            );
+        });
+      }
+      this.saveStatus = "ableSave";
+      this.floorCanvas.requestRenderAll();
+    },
     hexGenerator() {
       let hexValue = ["#"];
       function randomHex() {
@@ -1591,40 +1695,42 @@ export default {
       }
     },
     discriminateLightOrDark(color) {
-      let r = null;
-      let g = null;
-      let b = null;
-      let hsp = null;
+      if (color) {
+        let r = null;
+        let g = null;
+        let b = null;
+        let hsp = null;
 
-      // Check the format of the color, HEX or RGB?
-      if (color.match(/^rgb/)) {
-        // If HEX --> store the red, green, blue values in separate variables
-        color = color.match(
-          /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/
-        );
+        // Check the format of the color, HEX or RGB?
+        if (color.match(/^rgb/)) {
+          // If HEX --> store the red, green, blue values in separate variables
+          color = color.match(
+            /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/
+          );
 
-        r = color[1];
-        g = color[2];
-        b = color[3];
-      } else {
-        // If RGB --> Convert it to HEX: http://gist.github.com/983661
-        color = +(
-          "0x" + color.slice(1).replace(color.length < 5 && /./g, "$&$&")
-        );
+          r = color[1];
+          g = color[2];
+          b = color[3];
+        } else {
+          // If RGB --> Convert it to HEX: http://gist.github.com/983661
+          color = +(
+            "0x" + color.slice(1).replace(color.length < 5 && /./g, "$&$&")
+          );
 
-        r = color >> 16;
-        g = (color >> 8) & 255;
-        b = color & 255;
-      }
+          r = color >> 16;
+          g = (color >> 8) & 255;
+          b = color & 255;
+        }
 
-      // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
-      hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
+        // HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+        hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
 
-      // Using the HSP value, determine whether the color is light or dark
-      if (hsp > 127.5) {
-        return "light";
-      } else {
-        return "dark";
+        // Using the HSP value, determine whether the color is light or dark
+        if (hsp > 127.5) {
+          return "light";
+        } else {
+          return "dark";
+        }
       }
     },
     getSeatTextColor(hex) {
@@ -1669,12 +1775,15 @@ export default {
       );
 
       if (!this.floorCanvas.getActiveObject()) {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertNoSelectedSeat"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       }
@@ -1787,7 +1896,7 @@ export default {
       this.$dialog
         .confirm(message, options)
         .then((dialog) => {
-          //console.log("ok");
+          console.log("ok");
           this.deleteEachFloorSeatList(this.currentSelectedFloorObject.floorId);
           this.getEachFloorSeatList(
             this.currentSelectedFloorObject.floorId
@@ -1816,7 +1925,7 @@ export default {
           this.floorCanvas.discardActiveObject();
         })
         .catch(() => {
-          //console.log("cancel");
+          console.log("cancel");
           return;
         });
     },
@@ -1841,7 +1950,7 @@ export default {
       this.$dialog
         .confirm(message, options)
         .then((dialog) => {
-          //console.log("ok");
+          console.log("ok");
           this.floorCanvas.getActiveObjects().forEach((obj) => {
             if (obj.isObjFromDB) {
               let deleteSeat = {};
@@ -1879,7 +1988,7 @@ export default {
           this.floorCanvas.discardActiveObject();
         })
         .catch(() => {
-          //console.log("cancel");
+          console.log("cancel");
           return;
         });
     },
@@ -1906,12 +2015,15 @@ export default {
       });
 
       if (alreadyEmptySeat === activeObject) {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertAlreadyEmptySeat"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       }
@@ -2169,6 +2281,18 @@ export default {
       this.floorCanvas.discardActiveObject();
     },
     selectAllSeat() {
+      if (this.floorCanvas.getActiveObject()) {
+        if (
+          this.floorCanvas.getActiveObjects().length ===
+          this.floorCanvas.getObjects().length
+        ) {
+          return;
+        } else {
+          //이전에 active 된 자리 해제하기 => 다시 active 자리들로 묶기 위함
+          this.floorCanvas.discardActiveObject();
+        }
+      }
+
       let seats = new fabric.ActiveSelection(this.floorCanvas.getObjects(), {
         canvas: this.floorCanvas,
       });
@@ -2236,14 +2360,22 @@ export default {
         if (this.lockStatus === true && this.moveStatus === true) {
           this.lockStatus = false;
           this.floorCanvas.selection = true;
-          this.$notify({
-            group: "notifyApp",
-            type: "warn",
-            duration: 5000,
+          this.$notice.info({
             title: this.$i18n.t("alertCanvasLockStatus"),
-            ignoreDuplicates: true,
+            styles: {
+              width: "400px",
+              marginLeft: "-815px",
+              top: "118px",
+              backgroundColor: "#2a88bd",
+            },
+            duration: 5,
           });
         }
+        let objWidth = group.get("width") + 1;
+        let objHeight = group.get("height") + 1;
+        console.log(objWidth + "11111" + objHeight);
+        eventBus.$emit("sendDragSeatInformation", objWidth, objHeight);
+        eventBus.$emit("pushManageSeatTabOfSelectedSeatsComponentStatus", true);
       });
 
       group.on("mouseout", (event) => {
@@ -2529,6 +2661,7 @@ export default {
             this.toolTipStatus = false;
           }, 3000);
 
+          group.item(1).set("opacity", 0);
           group.item(0).set("opacity", 0);
           group.item(0).set("stroke", "blue");
           group.item(0).set("strokeWidth", 5);
@@ -2536,11 +2669,17 @@ export default {
           group.item(0).animate("opacity", 1, {
             duration: 2000,
             onChange: this.floorCanvas.renderAll.bind(this.floorCanvas),
+            onComplete: getOrginOpacity,
           });
           group.item(0).animate("fill", "red", {
             onChange: this.floorCanvas.renderAll.bind(this.floorCanvas),
             duration: 2000,
             onComplete: getOrginItem,
+          });
+          group.item(1).animate("opacity", 1, {
+            onChange: this.floorCanvas.renderAll.bind(this.floorCanvas),
+            duration: 2000,
+            onComplete: getOrginText,
           });
 
           let newEmployeeObject = {};
@@ -2548,11 +2687,28 @@ export default {
           newEmployeeObject.department = asObject.employeeDepartment;
 
           let color = this.getDepartmentObjectColor(newEmployeeObject);
+          let opacity = this.seatOpacity;
+          let canvas = this.floorCanvas;
+
           function getOrginItem() {
-            group.item(0).set("opacity", 1);
-            group.item(0).set("fill", color);
-            group.item(0).set("stroke", null);
-            group.item(0).set("strokeWidth", null);
+            setTimeout(() => {
+              group.item(0).set("fill", color);
+              group.item(0).set("stroke", null);
+              group.item(0).set("strokeWidth", null);
+              canvas.renderAll();
+            }, 1000);
+          }
+          function getOrginOpacity() {
+            setTimeout(() => {
+              group.item(0).set("opacity", opacity);
+              canvas.renderAll();
+            }, 1000);
+          }
+          function getOrginText() {
+            setTimeout(() => {
+              group.item(1).set("opacity", opacity);
+              canvas.renderAll();
+            }, 1000);
           }
         }
         //자리가 아직 없을때 예외처리 하기
@@ -2577,15 +2733,37 @@ export default {
         let objectDepartmentId = asObject.employeeDepartmentId;
         if (departmentObjectId === objectDepartmentId) {
           showDepartmentSeatList.push(group);
+        } else if (!departmentObjectId && !objectDepartmentId) {
+          showDepartmentSeatList.push(group);
+        }
+        showDepartmentSeatList.forEach((seat) => {
+          seat.item(0).set("opacity", 0);
+          seat.item(1).set("opacity", 0);
+
+          seat.item(0).animate("opacity", 1, {
+            duration: 2000,
+            onChange: this.floorCanvas.renderAll.bind(this.floorCanvas),
+            onComplete: getOrginItem,
+          });
+          group.item(1).animate("opacity", 1, {
+            onChange: this.floorCanvas.renderAll.bind(this.floorCanvas),
+            duration: 2000,
+            onComplete: getOrginItem,
+          });
+        });
+
+        let opacity = this.seatOpacity;
+        let canvas = this.floorCanvas;
+        function getOrginItem() {
+          setTimeout(() => {
+            for (let i = 0; i < showDepartmentSeatList.length; i++) {
+              showDepartmentSeatList[i].item(0).set("opacity", opacity);
+              showDepartmentSeatList[i].item(1).set("opacity", opacity);
+              canvas.renderAll();
+            }
+          }, 1000);
         }
       }
-      showDepartmentSeatList.forEach((seat) => {
-        seat.item(0).set("opacity", 0);
-        seat.item(0).animate("opacity", 1, {
-          duration: 2000,
-          onChange: this.floorCanvas.renderAll.bind(this.floorCanvas),
-        });
-      });
     },
     clickExportToCSVBtn() {
       //csv 내려받기(seatName, employeeId, floorId)
@@ -2678,7 +2856,6 @@ export default {
       this.floorCanvas.renderAll();
     },
     changeSeatSize(seatWidth, seatHeight) {
-      //console.log("changeSeatSize");
       let newSeatList = [];
       let eachFloorSeatList = this.getEachFloorSeatList(
         this.currentSelectedFloorObject.floorId
@@ -2754,6 +2931,70 @@ export default {
       this.allSeatMap.set(this.currentSelectedFloorObject.floorId, newSeatList);
       eventBus.$emit("pushAllSeatMap", this.allSeatMap);
       //this.floorCanvas.renderAll();
+    },
+    changeDragSeatSize(seatWidth, seatHeight) {
+      let newSeatList = [];
+      this.floorCanvas.getActiveObjects().forEach((obj) => {
+        let groupObject = obj.toObject([
+          "employeeDepartmentId",
+          "employeeDepartment",
+        ]);
+        let newEmployeeObject = {};
+        newEmployeeObject.departmentId = groupObject.employeeDepartmentId;
+        newEmployeeObject.department = groupObject.employeeDepartment;
+        let color = this.getDepartmentObjectColor(newEmployeeObject);
+        if (color === null) {
+          color = "#808080";
+        }
+        //let objWidth = obj.get("width") + 1;
+        //let objHeight = obj.get("height") + 1;
+        //eventBus.$emit("sendDragSeatInformation", objWidth, objHeight);
+
+        obj.set("width", seatWidth - 1);
+        obj.set("height", seatHeight - 1);
+        obj.item(0).set("width", seatWidth - 1);
+        obj.item(0).set("height", seatHeight - 1);
+        obj.set("dirty", true);
+        obj.set("httpRequestPostStatus", true);
+
+        this.floorCanvas.renderAll();
+        this.saveStatus = "ableSave";
+      });
+      this.floorCanvas.getObjects().forEach((obj) => {
+        newSeatList.push(obj);
+      });
+      this.allSeatMap.set(this.currentSelectedFloorObject.floorId, newSeatList);
+      eventBus.$emit("pushAllSeatMap", this.allSeatMap);
+    },
+    downloadURI(uri, name) {
+      var link = document.createElement("a");
+      if (typeof link.download === "string") {
+        link.href = uri;
+        link.download = name;
+        console.log(link);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        window.open(uri);
+      }
+    },
+    captureBtn() {
+      html2canvas(document.querySelector("#canvas")).then((canvas) => {
+        // var doc = new jsPDF("p", "mm", "a4"); // html2canvas의 canvas를 png로 바꿔준다.
+        // var imgData = canvas.toDataURL("image/png"); //Image 코드로 뽑아내기
+        //console.log(imgData);
+        // image 추가
+        //doc.addImage(imgData, "PNG", 0, 0);
+        // pdf로 저장
+        //doc.save("sample.pdf");
+        let dataUrl = document.getElementById("canvas").toDataURL();
+        let dataName = this.allImageMap.get(
+          this.currentSelectedFloorObject.floorId
+        ).imgFileName;
+        this.downloadURI(dataUrl, dataName);
+      });
+      console.log(this.allCanvasImageMap);
     },
     clickPrintBtn() {
       let dataUrl = document.getElementById("canvas").toDataURL();
@@ -2928,6 +3169,9 @@ export default {
 
             for (let i = 0; i < eachFloorDepartmentObjectList.length; i++) {
               let departmentId = eachFloorDepartmentObjectList[i].departmentId;
+              let departmentColor =
+                eachFloorDepartmentObjectList[i].departmentColor;
+
               const idx = this.allDepartmentObjectList.findIndex(
                 (departmentObject) => {
                   return departmentObject.departmentId === departmentId;
@@ -2935,7 +3179,11 @@ export default {
               );
               if (idx > -1) {
                 let departmentObject = this.allDepartmentObjectList[idx];
-                if (departmentObject.departmentColor === null) {
+                if (
+                  //부서색이 저장되어있지 않은 경우이거나 저장되어있는 부서색과 현재 부서색이 다른경우
+                  departmentObject.departmentColor === null ||
+                  departmentObject.departmentColor != departmentColor
+                ) {
                   departmentObjectToSaveList.push(
                     eachFloorDepartmentObjectList[i]
                   );
@@ -2958,6 +3206,7 @@ export default {
           // 층에 이미지가 있다면
           if (this.allImageMap.get(floorId) != null) {
             let file = this.allImageMap.get(floorId).imgPath;
+            console.log(file);
             if (typeof file === "string") {
               //dbFile
             } else {
@@ -2967,6 +3216,7 @@ export default {
               let newImage = {};
               newImage.floorId = floorId;
               newImage.imgData = imgData;
+              console.log(imgData);
               console.log(newImage);
               this.$store.commit("PUSH_IMAGEOBJECT", newImage);
             }
@@ -3255,10 +3505,33 @@ export default {
 </script>
 
 <style scoped>
-.canvas {
+#canvas-container {
+  position: relative;
+}
+#canvas {
   border: 1px solid #000;
   background: white;
   width: 100%;
   height: 100%;
+}
+#zoomInButton {
+  top: 1.5%;
+  left: 1%;
+  position: absolute;
+}
+#zoomOutButton {
+  top: 7.5%;
+  left: 1%;
+  position: absolute;
+}
+#resetZoomButton {
+  top: 13.5%;
+  left: 1%;
+  position: absolute;
+}
+#lockButton {
+  bottom: 1.5%;
+  left: 1%;
+  position: absolute;
 }
 </style>

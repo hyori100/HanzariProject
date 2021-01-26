@@ -1,20 +1,17 @@
 <template>
   <v-app id="app">
-    <v-app-bar app dark>
-      <v-toolbar color="black" dark>
-        <v-toolbar-title>{{ $t("projectMypage") }}</v-toolbar-title>
-        <v-spacer />
-        <v-btn text @click="logout">{{ $t("logout") }}</v-btn>
-      </v-toolbar>
+    <v-app-bar app color="#2c4f91" dark flat :height="30">
+      <v-toolbar-title>{{ $t("projectMypage") }}</v-toolbar-title>
+      <v-spacer />
+      <v-btn text @click="logout">{{ $t("logout") }}</v-btn>
     </v-app-bar>
+
     <v-main>
-      <v-container class="text-xs-center">
-        <v-layout
-          v-if="this.$store.state.getStore.loginEmployeeObject"
-          row
-          wrap
-          class="text-xs-center"
-        >
+      <v-container
+        class="text-xs-center"
+        v-if="this.$store.state.getStore.loginEmployeeObject"
+      >
+        <v-layout row wrap class="text-xs-center">
           <v-flex>
             <v-card flat class="mx-auto" height="200">
               <v-card-title class="justify-center">
@@ -40,17 +37,12 @@
                   }}
                 </h3>
               </v-card-title>
-              <v-divider />
             </v-card>
           </v-flex>
         </v-layout>
 
         <div
-          v-if="
-            !authorizeStatus &&
-            this.$store.state.getStore.loginEmployeeObject &&
-            !editUserPasswordStatus
-          "
+          v-if="!authorizeStatus && !editUserPasswordStatus"
           class="text-xs-center"
         >
           <v-layout>
@@ -58,17 +50,13 @@
               <v-card flat class="mx-auto">
                 <v-card-title class="justify-center">
                   <v-spacer />
-                  <v-btn x-large color="primary" @click="getEditUserPassword">{{
-                    $t("changeMemberInformation")
-                  }}</v-btn>
                   <v-btn
-                    x-large
-                    color="error"
-                    @click="getAuthorize"
-                    v-if="$store.state.userStore.authority === 'admin'"
-                    >{{ $t("grantAuthority") }}</v-btn
-                  ></v-card-title
-                >
+                    color="#2c4f91"
+                    style="height: 30px; color: white; font-size: 12px"
+                    @click="getEditUserPassword"
+                    >{{ $t("changeMemberInformation") }}</v-btn
+                  >
+                </v-card-title>
                 <v-divider />
               </v-card>
             </v-flex>
@@ -82,28 +70,28 @@
                   class="d-flex child-flex"
                   cols="4"
                 >
-                  <v-card
-                    style="height: 300px"
-                    @click="selectBuilding(buildingObj)"
-                  >
-                    <v-card-title class="justify-center">{{
-                      buildingObj.buildingName
-                    }}</v-card-title>
-                    <v-divider />
-                  </v-card>
+                  <v-hover v-slot="{ hover }">
+                    <v-card
+                      :elevation="hover ? 12 : 2"
+                      style="height: 300px"
+                      @click="selectBuilding(buildingObj)"
+                    >
+                      <v-card-title class="justify-center">{{
+                        buildingObj.buildingName
+                      }}</v-card-title>
+                      <v-divider />
+                    </v-card>
+                  </v-hover>
                 </v-col>
               </v-row>
             </v-flex>
           </v-layout>
         </div>
 
-        <ProgressDialog
-          v-else-if="!this.$store.state.getStore.loginEmployeeObject"
-          :dialogStatus="true"
-        />
         <AuthorizeEmployee v-else-if="authorizeStatus" />
         <EditPassword v-else-if="editUserPasswordStatus" />
       </v-container>
+      <ProgressDialog v-else :dialogStatus="true" />
     </v-main>
   </v-app>
 </template>
@@ -115,9 +103,7 @@ import ProgressDialog from "@/components/ProgressDialog.vue";
 import EditPassword from "@/components/EditPassword.vue";
 import AuthorizeEmployee from "@/components/AuthorizeEmployee.vue";
 import { refreshToken } from "../refreshToken.js";
-
-const HOST = "http://149.28.141.163:8080";
-
+const HOST = "http://172.30.6.192:8080";
 export default {
   components: {
     ProgressDialog,
@@ -137,32 +123,37 @@ export default {
     if (this.$store.state.getStore.loginEmployeeObject === null) {
       await this.getLoginEmployeeObject();
     }
-    console.log(this.$store.state.getStore);
-    console.log(this.$store.state.deleteStore);
-    console.log(this.$store.state.postStore);
-    console.log(this.$store.state.buildingStore);
+    this.$store.commit(
+      "setEmployeeName",
+      this.$store.state.getStore.loginEmployeeObject.employeeName
+    );
 
     eventBus.$on("pushAuthorizeStatus", (value) => {
       if (value === true) {
-        this.$notify({
-          group: "notifyApp",
-          type: "default",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertSuccessChangeAuthroity"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-835px",
+            top: "290px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
       }
       this.authorizeStatus = false;
     });
-
     eventBus.$on("pushEditUserPasswordStatus", (value) => {
       if (value === true) {
-        this.$notify({
-          group: "notifyApp",
-          type: "default",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertSuccessEditPassword"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-835px",
+            top: "290px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
       }
       this.editUserPasswordStatus = false;
@@ -201,9 +192,7 @@ export default {
     },
     selectBuilding(building) {
       this.$store.commit("buildingSelect", building);
-      if (this.$store.state.userStore.authority === "admin") {
-        this.$router.push("/Hanzari");
-      } else if (this.$store.state.userStore.authority === "manager") {
+      if (this.$store.state.userStore.authority === "manager") {
         this.$router.push("/ManagerHanzari");
       } else if (this.$store.state.userStore.authority === "viewer") {
         this.$router.push("/ViewerHanzari");

@@ -1,17 +1,16 @@
 <template>
   <div>
-    <v-toolbar color="black" dark>
-      <v-toolbar-title v-if="this.currentSelectedFloorObject"
-        >{{ this.currentSelectedFloorObject.floorName }}
-        {{ this.$t("floor") }}</v-toolbar-title
-      >
+    <v-toolbar color="#2c4f91" dark>
+      <v-spacer></v-spacer>
+      <h3>
+        <span>{{ $store.state.buildingStore.building.buildingName }}</span>
+      </h3>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-divider vertical></v-divider>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn text v-bind="attrs" v-on="on" @click="clickPrintBtn">
-              <v-icon large>print</v-icon>
+              <v-icon size="30px">print</v-icon>
             </v-btn></template
           >
           <span>{{ this.$t("tooltipPrintBtn") }}</span>
@@ -19,7 +18,7 @@
         <v-menu bottom rounded offset-y>
           <template v-slot:activator="{ on: onCard }">
             <v-btn text v-on="onCard">
-              <v-icon large>settings_applications</v-icon>
+              <v-icon size="30px">settings_applications</v-icon>
             </v-btn>
           </template>
           <v-card min-width="250px">
@@ -29,7 +28,9 @@
                   <v-col cols="12" sm="3"
                     ><v-tooltip bottom>
                       <template v-slot:activator="{ on, attrs }">
-                        <v-icon large v-bind="attrs" v-on="on">preview</v-icon>
+                        <v-icon size="30px" v-bind="attrs" v-on="on"
+                          >preview</v-icon
+                        >
                       </template>
                       <span>{{ viewSeatInfiTooltipText }}</span>
                     </v-tooltip> </v-col
@@ -62,7 +63,7 @@
                   <v-col cols="12" sm="3"
                     ><v-tooltip bottom>
                       <template v-slot:activator="{ on, attrs }">
-                        <v-icon large v-bind="attrs" v-on="on"
+                        <v-icon size="30px" v-bind="attrs" v-on="on"
                           >opacity</v-icon
                         ></template
                       >
@@ -185,7 +186,6 @@ export default {
     if (this.allDepartmentMap == null) {
       this.allDepartmentMap = new Map();
     }
-    console.log(this.currentSelectedFloorObject);
 
     //선택한 층에 대한 값 받아와서 층 전환하기 위한 event
     eventBus.$on("pushSelectedFloorObject", (floorObject) => {
@@ -220,6 +220,10 @@ export default {
     eventBus.$on("showSeatHighlight", (seatObject) => {
       this.showSeatHighlight(seatObject);
     });
+    //자리 하이라이트 하는 함수를 호출하기 위한 event
+    eventBus.$on("showDepartmentSeatHighlight", (departmentObjectId) => {
+      this.showDepartmentSeatHighlight(departmentObjectId);
+    });
   },
   mounted() {
     this.initializing();
@@ -230,6 +234,7 @@ export default {
     eventBus.$off("pushAllFloorList");
     eventBus.$off("pushAllImageMap");
     eventBus.$off("showSeatHighlight");
+    eventBus.$off("showDepartmentSeatHighlight");
   },
   methods: {
     initializing() {
@@ -603,6 +608,37 @@ export default {
         eventBus.$emit("pushDepartmentMap", this.allDepartmentMap);
 
         return departmentColor;
+      }
+    },
+    //해당 부서별 자리 하이라이트
+    showDepartmentSeatHighlight(departmentObjectId) {
+      let eachFloorSeatList = this.getEachFloorSeatList(
+        this.currentSelectedFloorObject.floorId
+      );
+      let showDepartmentSeatList = [];
+      for (let i = 0; i < eachFloorSeatList.length; i++) {
+        let group = eachFloorSeatList[i];
+        let asObject = group.toObject([
+          "employeeId",
+          "floorId",
+          "seatId",
+          "employeeDepartment",
+          "employeeDepartmentId",
+        ]);
+
+        let objectDepartmentId = asObject.employeeDepartmentId;
+        if (departmentObjectId === objectDepartmentId) {
+          showDepartmentSeatList.push(group);
+        } else if (!departmentObjectId && !objectDepartmentId) {
+          showDepartmentSeatList.push(group);
+        }
+        showDepartmentSeatList.forEach((seat) => {
+          seat.item(0).set("opacity", 0);
+          seat.item(0).animate("opacity", 1, {
+            duration: 2000,
+            onChange: this.floorCanvas.renderAll.bind(this.floorCanvas),
+          });
+        });
       }
     },
     showSeatHighlight(seatObject) {

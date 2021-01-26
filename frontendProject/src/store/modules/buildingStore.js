@@ -1,4 +1,5 @@
 import router from '@/router'
+import userStore from '@/store/modules/userStore.js'
 
 const buildingStore = {
     state: {
@@ -13,7 +14,11 @@ const buildingStore = {
         },
         backToMyPage: function (state) {
             state.building = ''
-            router.push({ name: 'myPage' })
+            if (userStore.state.authority === "admin") {
+                router.push({ name: 'AdminMyPage' })
+            } else {
+                router.push({ name: 'MyPage' })
+            }
         }
     }
 }

@@ -12,10 +12,10 @@
             indeterminate
             :size="150"
             :width="10"
-            color="black"
+            color="#2c4f91"
           ></v-progress-circular>
-          <v-card-title primary-title class="justify-center"
-            >Loading</v-card-title
+          <v-card-title
+            ><h4>{{ $t("loadingData") }}</h4></v-card-title
           >
         </v-card>
       </v-layout>

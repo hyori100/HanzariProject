@@ -1,14 +1,14 @@
 <template>
   <div id="assignSeatsScreen">
-    <v-toolbar color="black" dark>
-      <v-toolbar-title v-if="this.currentSelectedFloorObject"
-        >{{ currentSelectedFloorObject.floorName }}
-        {{ this.$t("floor") }}</v-toolbar-title
-      >
+    <v-toolbar color="#2c4f91" dark>
+      <v-spacer></v-spacer>
+      <h3>
+        <span>{{ $store.state.buildingStore.building.buildingName }}</span>
+      </h3>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-        <v-icon v-if="lockStatus === false" large>lock</v-icon>
-        <v-icon v-if="lockStatus === true" large>no_encryption</v-icon>
+        <v-icon v-if="lockStatus === false" size="30px">lock</v-icon>
+        <v-icon v-if="lockStatus === true" size="30px">no_encryption</v-icon>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-container fluid v-bind="attrs" v-on="on">
@@ -24,7 +24,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn text v-bind="attrs" v-on="on" @click="clickPrintBtn">
-              <v-icon large>print</v-icon>
+              <v-icon size="30px">print</v-icon>
             </v-btn></template
           >
           <span>{{ this.$t("tooltipPrintBtn") }}</span>
@@ -42,7 +42,7 @@
             <v-tooltip bottom>
               <template v-slot:activator="{ on: onTooltip }">
                 <v-btn text v-on="{ ...onMenu, ...onTooltip }"
-                  ><v-icon large>cloud_download</v-icon></v-btn
+                  ><v-icon size="30px">cloud_download</v-icon></v-btn
                 >
               </template>
               <span v-html="csvTooltipText"></span>
@@ -62,7 +62,7 @@
         <v-menu bottom rounded offset-y>
           <template v-slot:activator="{ on: onCard }">
             <v-btn text v-on="onCard">
-              <v-icon large>settings_applications</v-icon>
+              <v-icon size="30px">settings_applications</v-icon>
             </v-btn>
           </template>
           <v-card min-width="250px">
@@ -72,7 +72,9 @@
                   <v-col cols="12" sm="3"
                     ><v-tooltip bottom>
                       <template v-slot:activator="{ on, attrs }">
-                        <v-icon large v-bind="attrs" v-on="on">preview</v-icon>
+                        <v-icon size="30px" v-bind="attrs" v-on="on"
+                          >preview</v-icon
+                        >
                       </template>
                       <span>{{ viewSeatInfiTooltipText }}</span>
                     </v-tooltip> </v-col
@@ -105,7 +107,7 @@
                   <v-col cols="12" sm="3"
                     ><v-tooltip bottom>
                       <template v-slot:activator="{ on, attrs }">
-                        <v-icon large v-bind="attrs" v-on="on"
+                        <v-icon size="30px" v-bind="attrs" v-on="on"
                           >opacity</v-icon
                         ></template
                       >
@@ -185,7 +187,7 @@ import { eventBus } from "../main.js";
 import axios from "axios";
 import { refreshToken } from "@/refreshToken.js";
 
-const HOST = "http://149.28.141.163:8080";
+const HOST = "http://172.30.6.192:8080";
 export default {
   name: "AssignSeats",
   data() {
@@ -309,12 +311,15 @@ export default {
       if (this.floorCanvas.getActiveObject()) {
         this.changeSeatToVacant();
       } else {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertNoSelectedSeat"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       }
@@ -601,6 +606,9 @@ export default {
       if (this.ctrlKey) {
         switch (key) {
           case 65:
+            //browser의 콘텐츠 전체선택 block
+            event.preventDefault();
+            event.stopPropagation();
             this.selectAllSeat();
             break;
         }
@@ -993,12 +1001,15 @@ export default {
       );
 
       if (!this.floorCanvas.getActiveObject()) {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertNoSelectedSeat"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       }
@@ -1119,12 +1130,15 @@ export default {
       });
 
       if (alreadyEmptySeat === activeObject) {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertAlreadyEmptySeat"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       }
@@ -1189,6 +1203,18 @@ export default {
         });
     },
     selectAllSeat() {
+      if (this.floorCanvas.getActiveObject()) {
+        if (
+          this.floorCanvas.getActiveObjects().length ===
+          this.floorCanvas.getObjects().length
+        ) {
+          return;
+        } else {
+          //이전에 active 된 자리 해제하기 => 다시 active 자리들로 묶기 위함
+          this.floorCanvas.discardActiveObject();
+        }
+      }
+
       let seats = new fabric.ActiveSelection(this.floorCanvas.getObjects(), {
         canvas: this.floorCanvas,
       });
@@ -1238,12 +1264,15 @@ export default {
         if (this.lockStatus === true && this.moveStatus === true) {
           this.lockStatus = false;
           this.floorCanvas.selection = true;
-          this.$notify({
-            group: "notifyApp",
-            type: "warn",
-            duration: 5000,
+          this.$notice.info({
             title: this.$i18n.t("alertCanvasLockStatus"),
-            ignoreDuplicates: true,
+            styles: {
+              width: "400px",
+              marginLeft: "-815px",
+              top: "118px",
+              backgroundColor: "#2a88bd",
+            },
+            duration: 5,
           });
         }
       });

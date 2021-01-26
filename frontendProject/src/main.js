@@ -9,10 +9,11 @@ import vSelectMenu from 'v-selectmenu'
 import { i18n } from '@/plugins/i18n'
 import axios from 'axios' // we can use this.$axios without using 'import' in vue instance
 import store from '@/store/index.js'
-import Notifications from 'vue-notification'
 import VuejsDialog from 'vuejs-dialog';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
- 
+import CripNotice from "crip-vue-notice"
+import VueNumericInput from 'vue-numeric-input';
+
 export const eventBus = new Vue()
 Vue.prototype.$axios = axios
 
@@ -24,8 +25,9 @@ export default new Vuetify({
 
 Vue.use(Vuetify)
 Vue.use(vSelectMenu)
-Vue.use(Notifications)
 Vue.use(VuejsDialog);
+Vue.use(CripNotice)
+Vue.use(VueNumericInput)
 
 /* eslint-disable no-new */
 new Vue({

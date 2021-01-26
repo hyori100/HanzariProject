@@ -1,63 +1,95 @@
 <template>
   <v-app id="app">
-    <div class="hanzari" id="hanzari">
-      <v-app-bar app dark>
-        <v-toolbar color="black" dark>
-          <v-toolbar-items>
-            <v-icon large dark @click="leftDrawer = !leftDrawer"
-              >menu</v-icon
-            > </v-toolbar-items
-          ><v-toolbar-title>{{ $t("projectName") }}</v-toolbar-title>
+    <div v-if="this.$store.state.getStore.otherFloorsSeatMap" class="parent">
+      <v-navigation-drawer v-model="leftDrawer" app :width="450">
+        <Tabs />
+      </v-navigation-drawer>
 
-          <v-spacer></v-spacer>
-          <v-btn
-            text
-            v-if="saveStatus"
-            v-confirm="{
-              ok: backToMyPage,
-              message: message,
-              html: true,
-              okText: okText,
-              cancelText: cancelText,
-            }"
-          >
-            {{ $t("backToMyPage") }}
-          </v-btn>
-          <v-btn text @click="backToMyPage" v-if="!saveStatus">
-            {{ $t("backToMyPage") }}
-          </v-btn>
-          <!--v-btn text @click="backToMyPage">{{ $t("backToMyPage") }}</v-btn-->
-          <v-btn text @click="logout">{{ $t("logout") }}</v-btn>
-          <v-toolbar-items>
-            <v-icon large dark @click="rightDrawer = !rightDrawer" v-if="rightDrawer"
-              >keyboard_arrow_right</v-icon
-            >
-            <v-icon large dark @click="rightDrawer = !rightDrawer" v-if="!rightDrawer"
-              >keyboard_arrow_left</v-icon
-            >
-          </v-toolbar-items></v-toolbar
+      <v-app-bar app color="#2c4f91" dark flat :height="30">
+        <v-icon
+          size="30px"
+          dark
+          style="background-color: #1c3563"
+          @click="leftDrawer = !leftDrawer"
+          v-if="leftDrawer"
+          >keyboard_arrow_left</v-icon
+        >
+        <v-icon
+          size="30px"
+          dark
+          style="background-color: #1c3563"
+          @click="leftDrawer = !leftDrawer"
+          v-if="!leftDrawer"
+          >keyboard_arrow_right</v-icon
+        >
+        <v-divider vertical></v-divider>
+        <div class="mx-3">
+          <v-toolbar-title>{{ $t("projectName") }}</v-toolbar-title>
+        </div>
+        <v-spacer></v-spacer>
+
+        <v-btn text disabled id="custom-disabled">{{
+          this.$store.state.userStore.employeeName + $t("user")
+        }}</v-btn>
+
+        <v-divider vertical></v-divider>
+        <v-btn
+          text
+          v-if="saveStatus"
+          v-confirm="{
+            ok: backToMyPage,
+            message: message,
+            html: true,
+            okText: okText,
+            cancelText: cancelText,
+          }"
+        >
+          {{ $t("backToMyPage") }}
+        </v-btn>
+        <v-btn text @click="backToMyPage" v-if="!saveStatus">
+          {{ $t("backToMyPage") }}
+        </v-btn>
+
+        <v-divider vertical></v-divider>
+        <v-btn text @click="logout">{{ $t("logout") }}</v-btn>
+
+        <v-divider vertical></v-divider>
+        <v-icon
+          size="30px"
+          dark
+          style="background-color: #1c3563"
+          @click="rightDrawer = !rightDrawer"
+          v-if="rightDrawer"
+          >keyboard_arrow_right</v-icon
+        >
+        <v-icon
+          size="30px"
+          dark
+          style="background-color: #1c3563"
+          @click="rightDrawer = !rightDrawer"
+          v-if="!rightDrawer"
+          >keyboard_arrow_left</v-icon
         >
       </v-app-bar>
 
-      <div v-if="this.$store.state.getStore.otherFloorsSeatMap">
-        <v-navigation-drawer v-model="leftDrawer" app :width="500">
-          <Tabs />
+      <v-main
+        ><AssignSeats
+          v-on:reloadData="reloadData"
+          v-on:downloadCSVFile="downloadCSVFile"
+          v-on:saveFromCSVFileToDB="saveFromCSVFileToDB"
+        />
+        <v-navigation-drawer
+          v-model="rightDrawer"
+          app
+          :width="450"
+          :right="true"
+        >
+          <v-toolbar color="#2c4f91" :height="95" dark> </v-toolbar>
+          <FlowInformationTable />
         </v-navigation-drawer>
-        <v-main>
-          <AssignSeats
-            v-on:reloadData="reloadData"
-            v-on:downloadCSVFile="downloadCSVFile"
-            v-on:saveFromCSVFileToDB="saveFromCSVFileToDB"
-          />
-          <v-navigation-drawer v-model="rightDrawer" app :width="250" :right="true">
-            <v-toolbar color="black" height="128" dark> </v-toolbar>
-            <FlowInformationTable />
-            <DepartmentColorChips />
-          </v-navigation-drawer>
-        </v-main>
-      </div>
-      <ProgressDialog v-else :dialogStatus="true" />
+      </v-main>
     </div>
+    <ProgressDialog v-else :dialogStatus="true" />
   </v-app>
 </template>
 
@@ -72,7 +104,7 @@ import DepartmentColorChips from "@/components/DepartmentColorChips.vue";
 import FlowInformationTable from "@/components/FlowInformationTable.vue";
 import { refreshToken } from "../refreshToken.js";
 
-const HOST = "http://149.28.141.163:8080";
+const HOST = "http://172.30.6.192:8080";
 
 export default {
   name: "Hanzari",
@@ -86,7 +118,7 @@ export default {
   data() {
     return {
       leftDrawer: null,
-      rightDrawer: null,
+      rightDrawer: false,
       saveStatus: null,
       message: {
         title: this.$i18n.t("titleConfirmNotSaveWork"),
@@ -100,6 +132,7 @@ export default {
     if (this.$store.state.getStore.allBuildings === null) {
       await this.getBuildingList();
     }
+
     if (this.$store.state.getStore.allEmployee === null) {
       await this.getEmployeeList();
     }
@@ -132,7 +165,9 @@ export default {
       await this.$store.dispatch("getDepartmentList");
     },
     async getFloorList() {
+      //if (this.$store.state.getStore.allFloor != null) {
       await this.$store.dispatch("getAllFloors");
+      //}
     },
     async getLatestFloorImage() {
       await this.$store.dispatch("getLatestFloorImage");
@@ -248,25 +283,38 @@ export default {
 
       if (objectFromFailedList.reason === "seatId is null") {
         if (objectFromFailedList.faildVo.seatName) {
-          errorMessage = this.$i18n.t("errorMessageWhenSeatIdIsNullWithSeatName", {
-            seatNameFromCSV: objectFromFailedList.faildVo.seatName,
-          });
+          errorMessage = this.$i18n.t(
+            "errorMessageWhenSeatIdIsNullWithSeatName",
+            {
+              seatNameFromCSV: objectFromFailedList.faildVo.seatName,
+            }
+          );
         } else {
-          errorMessage = this.$i18n.t("errorMessageWhenSeatIdIsNullWithoutSeatName");
+          errorMessage = this.$i18n.t(
+            "errorMessageWhenSeatIdIsNullWithoutSeatName"
+          );
         }
       } else if (objectFromFailedList.reason === "seat doesn't exist") {
         if (objectFromFailedList.faildVo.seatName) {
-          errorMessage = this.$i18n.t("errorMessageWhenSeatIdNotExistWithSeatName", {
-            seatNameFromCSV: objectFromFailedList.faildVo.seatName,
-          });
+          errorMessage = this.$i18n.t(
+            "errorMessageWhenSeatIdNotExistWithSeatName",
+            {
+              seatNameFromCSV: objectFromFailedList.faildVo.seatName,
+            }
+          );
         } else {
-          errorMessage = this.$i18n.t("errorMessageWhenSeatIdNotExistWithoutSeatName");
+          errorMessage = this.$i18n.t(
+            "errorMessageWhenSeatIdNotExistWithoutSeatName"
+          );
         }
       } else if (objectFromFailedList.reason === "employee doesn't exist") {
         if (objectFromFailedList.faildVo.seatName) {
-          errorMessage = this.$i18n.t("errorMessageWhenEmployeeIdNotExistWithSeatName", {
-            seatNameFromCSV: objectFromFailedList.faildVo.seatName,
-          });
+          errorMessage = this.$i18n.t(
+            "errorMessageWhenEmployeeIdNotExistWithSeatName",
+            {
+              seatNameFromCSV: objectFromFailedList.faildVo.seatName,
+            }
+          );
         } else {
           errorMessage = this.$i18n.t(
             "errorMessageWhenEmployeeIdNotExistWithoutSeatName"
@@ -292,10 +340,12 @@ export default {
           seatNameOfSeatIdIsNull += failedObjectsList[i].faildVo.seatName + " ";
         } else if (failedObjectsList[i].reason === "seat doesn't exist") {
           numberOfSeatIsNotExist++;
-          seatNameOfSeatIsNotExist += failedObjectsList[i].faildVo.seatName + " ";
+          seatNameOfSeatIsNotExist +=
+            failedObjectsList[i].faildVo.seatName + " ";
         } else if (failedObjectsList[i].reason === "employee doesn't exist") {
           numberOfEmployeeIsNotExist++;
-          seatNameOfEmployeeIsNotExist += failedObjectsList[i].faildVo.seatName + " ";
+          seatNameOfEmployeeIsNotExist +=
+            failedObjectsList[i].faildVo.seatName + " ";
         }
       }
       errorMessage = this.$i18n.t("errorMessageWhenFailedObjectsAreMany", {
@@ -351,7 +401,9 @@ export default {
 
               //failedObjectsList의 push된 객체들이 있다면 그에 맞는 errorMessage추출하기
               if (failedObjectsList.length > 0) {
-                errorMessage = this.getErrorMessageFromFailReasons(failedObjectsList);
+                errorMessage = this.getErrorMessageFromFailReasons(
+                  failedObjectsList
+                );
                 console.log(errorMessage);
               }
               let message = {
@@ -366,7 +418,7 @@ export default {
                 .alert(message, options)
                 .then((dialog) => {
                   //console.log("ok");
-                   return;
+                  return;
                 })
                 .catch(() => {
                   //console.log("cancel");
@@ -438,3 +490,12 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+#custom-disabled.v-btn--disabled {
+  color: white !important;
+}
+.parent >>> .v-toolbar__content {
+  padding: 0px !important;
+}
+</style>

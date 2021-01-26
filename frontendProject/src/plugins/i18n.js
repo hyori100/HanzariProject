@@ -10,7 +10,7 @@ const messages = {
     ko: {
         //AssignSeats.vue
         "floor": "층",
-        "resetRatio": "배율 초기화",
+        "resetRatio": "배율 및 도면위치 초기화",
         "btnSave": "저장",
         "btnSaving": "저장 중..",
         "btnSaveDone": "저장 완료",
@@ -18,11 +18,12 @@ const messages = {
         "tooltipViewSeatInfo": "전체 층에 있는 모든 자리의 상세 정보를 변경할 수 있습니다.",
         "tooltipPanMode": "도면화면의 이동 잠금을 설정하거나 해제할 수 있습니다.",
         "tooltipDeleteAllBtn": "현재 층의 자리들을 전체 삭제할 수 있습니다.",
+        "tooltipCaptureBtn": "현재 층의 도면 캡쳐",
         "tooltipPrintBtn": "현재 층의 도면화면과 자리 정보가 담긴 표를 인쇄할 수 있습니다.",
         "tooltipCSVBtn": "현재 건물에 저장된 모든 자리 정보가 담긴 csv 파일을 다운로드 및 수정 후 업로드할 수 있습니다.",
         "contextMenuDelete": "삭제하기",
         "contextMenuCopy": "복제하기",
-        "contextMenuSeatSize":"자리 크기 조정하기",
+        "contextMenuSeatSize": "자리 크기 조정하기",
         "contextMenuViewSeatAboutEmployeeName": "사원명",
         "contextMenuViewSeatAboutNumber": "내선번호",
         "contextMenuViewSeatAboutDepartment": "부서명",
@@ -84,28 +85,32 @@ const messages = {
         "alertRemoveCheckRightTable": "우측 테이블에 체크를 해제해야합니다.",
         "alertRemoveCheckLeftTable": "좌측 테이블에 체크를 해제해야합니다.",
 
+        //BuildingSetting.vue
+        "inputBuildingName": "건물명 입력",
+        "textInputBuildingName": "새로 생성할 건물명을 입력하세요.",
+
         //EditPassword.vue
         "textEditPassword": "비밀번호 변경",
-        "alertNoInputOldPassword":"현재 비밀번호를 입력해야합니다.",
-        "alertNoInputNewPassword":"새 비밀번호를 입력해야합니다.",
+        "alertNoInputOldPassword": "현재 비밀번호를 입력해야합니다.",
+        "alertNoInputNewPassword": "새 비밀번호를 입력해야합니다.",
         "alertSamePreviousPassword": "현재 비밀번호와 동일합니다.",
         "alertSuccessEditPassword": "비밀번호 변경 성공",
         "errorChangePassword": "현재 비밀번호와 동일하지 않습니다.",
         "textFieldLabelPreviousPw": "현재 비밀번호",
         "textFieldLabelChangePw": "새 비밀번호",
-        "textFieldLabelChangePwCompare":"새 비밀번호 확인",
+        "textFieldLabelChangePwCompare": "새 비밀번호 확인",
 
         //FlowInformationTable.vue
         "headersDivision": "구분",
         "headersNumberOfSeat": "자리 수",
-        "textAllSeat": "전체 자리",
+        "textAllSeat": "전체",
 
         //ManageFloors.vue
         "textBuildingName": "건물 이름",
         "textSelectFloor": "층 선택",
         "textSettingFloor": "층 설정",
         "btnConfirm": "확인",
-        "textSettingImage": "배경 이미지 설정",
+        "textSettingImage": "도면 이미지 설정",
         "btnUploadImage": "업로드",
         "textUploadImage": "이미지를 업로드하세요.",
         "alertNoFloorOnImage": "도면을 올릴 층이 없습니다.",
@@ -116,17 +121,25 @@ const messages = {
         "textFieldLabelSearchSeat": "이름/부서/내선번호 중 입력하세요.",
         "dataTabelNoDataTextSeat": "자리에 매핑된 사원 데이터가 없습니다.",
         "dataTabelPerPageTextSeat": "페이지 당 자리수",
+        "searchEmployee": "사원 자리 검색",
+        "findSeat": "찾기",
 
         //ManageSeats.vue
         "textMakeSeat": "자리 만들기",
+        "textInformationOfSeat": "자리 상세정보",
+        "textOpactiyOfSeat": "자리 불투명도",
         "tooltipAddSeatSwitch": "스위치를 켜면 선택한 자리의 개수만큼 도면화면 위에 드래그하여 자리 생성이 가능합니다.",
         "btnMappingEmployee": "사원 매핑하기",
         "btnChangeToVacant": "자리 비우기",
+        "btnDeleteAllSeats": "자리 전체 삭제하기",
+        "btnOk": "확인",
         "textChangeFloorSeat": "층간 이동하기",
         "alertNoSelectFloor": "이동할 층을 선택하지 않았습니다.",
         "alertNoSelectBuildingFloor": "이동할 건물의 층을 선택하지 않았습니다.",
         "alertNoImage": "해당 건물 층에 이미지가 없습니다.",
         "textChangeBuildingSeat": "건물간 이동하기",
+        "textMemoToSeat": "메모 작성하기",
+        "textInMemoTextArea": "자리에 남기고자 하는 메모를 입력하세요.",
         "selectLabelNumberSeat": "자리 개수",
         "selectLabelFloor": "이동할 층을 선택하세요.",
         "selectLabelBuilding": "이동할 건물의 층을 선택하세요.",
@@ -134,12 +147,17 @@ const messages = {
         "selectNoDataBuilding": "이동할 건물이 없습니다.",
         "reorderSeatName": "자리명 재정렬",
         "reorder": "재정렬하기",
+        "mapping": "매핑하기",
+
+        //ProgressDialog.vue
+        "loadingData": "데이터 로딩중..",
 
         //Hanzari.vue
         "btnOK": "확인",
-        "backToMyPage": "마이페이지 돌아가기",
+        "backToMyPage": "마이페이지",
         "confirmLogout": "로그아웃 하시겠습니까?",
         "logout": "로그아웃",
+        "user": "님",
         "projectName": "한자리",
         "confirmNotSaveWork": "저장되지 않은 작업이 있습니다.<br>그래도 마이페이지로 이동하시겠습니까?",
         "titleOfCSVErrorConfirmDialog": "CSV 업로드 오류",
@@ -160,11 +178,20 @@ const messages = {
         "login": "로그인",
         "employeeId": "사번",
         "password": "비밀번호",
+        "alertErrorLogin": "가입하지 않은 아이디이거나, 잘못된 비밀번호입니다.",
+        "employeeIdExample": "1012345",
 
-        //MyPageAfterLogin.vue
+        //AdminMyPage.vue
         "projectMypage": "한자리 마이페이지",
-        "changeMemberInformation": "회원 정보 변경",
+        "createNewBuilding": "새 건물 생성",
+        "changeMemberInformation": "비밀번호 변경",
         "grantAuthority": "권한 변경",
+        "contextMenuDeleteBuilding": "건물 삭제",
+        "contextMenuEditBuildingName": "건물명 변경",
+        "titleConfirmDeleteBuilding": "건물 삭제하기",
+        "confirmDeleteBuilding": "{buildingName} 건물을 삭제하시겠습니까?",
+        "titleConfirmChangeBuildingName": "건물명 변경하기",
+        "promptChangeBuildingName": "'{buildingName}'에서 변경할 건물명을 입력하세요.",
 
         //ViewerManageFloors.vue
         "buildingName": "건물이름",
@@ -178,9 +205,8 @@ const messages = {
         "superMypageTitle": "한자리 권한변경",
         "btnMoveEmployeeToRightDataTable": ">>이동",
         "btnMoveEmployeeToLeftDataTable": "<<이동",
-        "btnConfirmAuthorizeEmployee": "확인",
-        "btnCancelAuthorizeEmployee": "취소",
         "btnResetAuthorizeEmployee": "초기화",
+        "alertSuccessChangeEmployeeAuthority" : "권한 변경에 성공하였습니다.",
 
         //Tabs.vue
         "settingSeat": "자리 설정",

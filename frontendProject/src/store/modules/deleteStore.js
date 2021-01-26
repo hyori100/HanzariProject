@@ -1,7 +1,7 @@
 import axios from "axios";
 import { refreshToken } from '../../refreshToken.js'
 
-const HOST = "http://149.28.141.163:8080";
+const HOST = "http://172.30.6.192:8080";
 
 const deleteStore = {
     state: {
@@ -32,6 +32,40 @@ const deleteStore = {
         },
     },
     actions: {
+        async deleteBuildingKey({ rootState }, deleteBuildingKey) {
+            console.log("delete 건물 호출")
+            let errorStatus = null;
+            try {
+                await axios.delete(
+                    HOST +
+                    "/api/buildings/" + deleteBuildingKey,
+                    {
+                        headers: { "X-AUTH-TOKEN": rootState.userStore.token },
+                    }
+                ).then(function (response) {
+                    console.log(response)
+                }).catch(error => {
+                    errorStatus = error.response.status
+                    console.log(errorStatus)
+                });
+                if (errorStatus === 401) {
+                    await refreshToken();
+                    console.log("!!!새로 발급 받은 토큰 입니다!!!")
+                    console.log(rootState.userStore.token);
+                    await axios.delete(
+                        HOST +
+                        "/api/buildings/" + deleteBuildingKey,
+                        {
+                            headers: { "X-AUTH-TOKEN": rootState.userStore.token },
+                        }
+                    ).then(function (response) {
+                        console.log(response)
+                    })
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        },
         async deleteFloorWithKey({ rootState, commit, state }) {
             console.log("delete 층 호출")
             console.log(state.deleteFloorIdList)

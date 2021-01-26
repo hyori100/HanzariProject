@@ -1,32 +1,23 @@
 <template>
   <div>
     <v-card flat color="transparent">
-      <v-row>
-        <v-col cols="12" sm="6">
-          <v-card-title
-            ><v-icon large>domain</v-icon>
-            <h3>{{ this.$t("textBuildingName") }}</h3></v-card-title
-          ></v-col
-        ><v-col cols="12" sm="6">
-          <v-card-text>{{
-            $store.state.buildingStore.building.buildingName
-          }}</v-card-text></v-col
-        ></v-row
-      >
-      <v-divider class="mx-4"></v-divider>
       <!-- 세팅 들어가기 이전-->
       <div v-if="!this.settingStatus">
-        <v-row>
+        <v-row style="margin-top: -10px">
           <v-col cols="12" sm="9">
-            <v-card-title
-              ><v-icon large>stairs</v-icon>
-              <h3>{{ this.$t("textSettingFloor") }}</h3></v-card-title
+            <v-card-title>
+              <h4>{{ this.$t("textSelectFloor") }}</h4></v-card-title
             ></v-col
-          ><v-col cols="12" sm="3">
+          ><v-col cols="12" sm="3" style="margin-top: 15px">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
-                <v-btn small @click="getSettings" v-bind="attrs" v-on="on"
-                  ><v-icon medium dark>settings</v-icon></v-btn
+                <v-btn
+                  style="float: right; width: 30px"
+                  text
+                  @click="getSettings"
+                  v-bind="attrs"
+                  v-on="on"
+                  ><v-icon size="30px" dark>settings</v-icon></v-btn
                 ></template
               >
               <span>{{ this.$t("tooltipFloorSettingBtn") }}</span>
@@ -34,50 +25,92 @@
           </v-col>
         </v-row>
 
-        <v-row style="overflow-y: scroll; height: 180px">
-          <v-col
+        <div style="overflow-x: hidden; overflow-y: auto; height: 600px">
+          <v-row
             v-for="floorObject of this.allFloorList"
             :key="floorObject.floorId"
-            class="d-flex child-flex"
-            cols="4"
+            style="padding-left: 15px"
           >
-            <v-btn
-              large
-              @click="clickFloor(floorObject)"
-              :style="{
-                border: clickFloorIndexes.includes(floorObject.floorId)
-                  ? 'thick solid black'
-                  : '',
-              }"
-              ><h3>{{ floorObject.floorName }}</h3></v-btn
-            >
-          </v-col>
-        </v-row>
+            <v-col cols="11" style="flex: 0 0 93%; max-width: 93%">
+              <v-btn
+                block
+                @click="clickFloor(floorObject)"
+                :style="{
+                  border: clickFloorIndexes.includes(floorObject.floorId)
+                    ? 'thick solid #2c4f91'
+                    : '',
+                  fontWeight: clickFloorIndexes.includes(floorObject.floorId)
+                    ? 'bold'
+                    : '',
+                  height: '45px',
+                }"
+                >{{ floorObject.floorName }}</v-btn
+              >
+            </v-col>
+          </v-row>
+        </div>
+
+        <v-divider class="mx-4"></v-divider>
+
+        <v-card-title>
+          <h4>{{ this.$t("textSettingImage") }}</h4></v-card-title
+        >
+        <div class="mx-3">
+          <v-row>
+            <v-col cols="12" sm="9">
+              <v-card :height="30">
+                <div class="mx-auto text-center">
+                  {{ currentFloorImageName }}
+                </div>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="3">
+              <input
+                v-show="false"
+                ref="upload"
+                type="file"
+                @change="changeImageFile"
+              />
+              <v-btn
+                color="#2c4f91"
+                style="
+                  float: right;
+                  height: 30px;
+                  color: white;
+                  font-size: 12px;
+                "
+                @click="uploadImage()"
+                ><h4>{{ this.$t("btnUploadImage") }}</h4></v-btn
+              >
+            </v-col>
+          </v-row>
+        </div>
       </div>
 
       <!-- 세팅 들어간 이후-->
       <div v-else>
-        <v-row>
+        <v-row style="margin-top: -10px">
           <v-col cols="12" sm="9">
-            <v-card-title
-              ><v-icon large>stairs</v-icon>
-              <h3>{{ this.$t("textSettingFloor") }}</h3></v-card-title
+            <v-card-title>
+              <h4>{{ this.$t("textSettingFloor") }}</h4></v-card-title
             > </v-col
-          ><v-col cols="12" sm="3">
-            <v-btn small
-              ><v-icon medium dark @click="addFloor">add_circle</v-icon></v-btn
+          ><v-col cols="12" sm="3" style="margin-top: 15px">
+            <v-btn style="float: right; width: 30px" text
+              ><v-icon size="30px" dark @click="addFloor"
+                >add_circle</v-icon
+              ></v-btn
             >
           </v-col>
         </v-row>
 
-        <div style="overflow-y: scroll; height: 180px">
+        <div style="overflow-x: hidden; overflow-y: auto; height: 600px">
           <v-row
             v-for="floorObject of this.settingsFloorList"
             :key="floorObject.floorId"
             class="d-flex child-flex"
-            style="padding-left: 5px"
+            style="padding-left: 15px"
           >
-            <v-col cols="10" sm="8">
+            <v-col cols="9">
               <v-text-field
                 name="editFloorNameInSetting[]"
                 v-model="editFloorNameInSetting[floorObject.floorId]"
@@ -87,48 +120,28 @@
               ></v-text-field>
             </v-col>
 
-            <v-col cols="10" sm="2">
-              <v-btn @click="removeFloor(floorObject.floorId)"
+            <v-col cols="2" style="padding-left: 25px">
+              <v-btn text @click="removeFloor(floorObject.floorId)"
                 ><v-icon large>delete</v-icon></v-btn
               >
             </v-col>
           </v-row>
         </div>
 
-        <div style="text-align: right">
-          <v-btn @click="cancelSettings">{{ this.$t("btnCancel") }}</v-btn>
-          <v-btn @click="confirmSettings" color="primary">{{
-            this.$t("btnConfirm")
-          }}</v-btn>
+        <div style="text-align: right; margin-top: 50px">
+          <v-btn
+            @click="cancelSettings"
+            style="height: 30px; font-size: 12px"
+            >{{ this.$t("btnCancel") }}</v-btn
+          >
+          <v-btn
+            @click="confirmSettings"
+            color="#2c4f91"
+            style="height: 30px; color: white; font-size: 12px"
+            >{{ this.$t("btnConfirm") }}</v-btn
+          >
         </div>
       </div>
-
-      <v-divider class="mx-4"></v-divider>
-
-      <v-card-title
-        ><v-icon large>image</v-icon>
-        <h3>{{ this.$t("textSettingImage") }}</h3></v-card-title
-      >
-      <v-row>
-        <v-col cols="12" sm="9">
-          <v-card>
-            <v-card-text>{{ currentFloorImageName }}</v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="3">
-          <v-card-text>
-            <input
-              v-show="false"
-              ref="upload"
-              type="file"
-              @change="changeImageFile"
-            />
-            <v-btn color="blue-grey lighten-2" @click="uploadImage()"
-              ><h4>{{ this.$t("btnUploadImage") }}</h4></v-btn
-            >
-          </v-card-text>
-        </v-col>
-      </v-row>
     </v-card>
   </div>
 </template>
@@ -291,6 +304,7 @@ export default {
     },
     // 층 추가
     addFloor() {
+      let addFloorTimeStamp;
       let newFloorObject = {};
       newFloorObject.floorId = this.createFloorUUID();
       newFloorObject.floorName = "";
@@ -300,6 +314,9 @@ export default {
       newFloorObject.httpRequestPostStatus = true;
 
       this.settingsFloorList.push(newFloorObject);
+
+      addFloorTimeStamp = new Date().toISOString().substr(0, 23);
+      console.log(addFloorTimeStamp);
     },
     // 층 삭제
     removeFloor(floorId) {
@@ -385,12 +402,14 @@ export default {
         }
       }
 
-
-
       console.log(this.currentSelectedFloorObject);
 
       eventBus.$emit("sendStoreStatus", this.saveStatus);
       eventBus.$emit("pushAllFloorList", this.allFloorList);
+      eventBus.$emit(
+        "pushSelectedFloorObject",
+        this.currentSelectedFloorObject
+      );
       this.settingStatus = false;
     },
     //층 세팅 취소
@@ -414,12 +433,15 @@ export default {
         //changeImageFile 함수 call
         this.$refs.upload.click();
       } else {
-        this.$notify({
-          group: "notifyApp",
-          type: "warn",
-          duration: 5000,
+        this.$notice.info({
           title: this.$i18n.t("alertNoFloorOnImage"),
-          ignoreDuplicates: true,
+          styles: {
+            width: "400px",
+            marginLeft: "-815px",
+            top: "118px",
+            backgroundColor: "#2a88bd",
+          },
+          duration: 5,
         });
         return;
       }

@@ -1,5 +1,9 @@
 <template>
-  <v-card flat color="transparent">
+  <v-card flat>
+    <v-card-title>
+      <div class="mx-1"></div>
+      <h4>{{ this.$t("searchEmployee") }}</h4>
+    </v-card-title>
     <v-card-title>
       <v-text-field
         v-model="search"
@@ -14,7 +18,7 @@
       :headers="headers"
       :items="allEmployeeSeat"
       :search="search"
-      height="400px"
+      height="600px"
       class="elevation-1"
       :no-data-text="$t('dataTabelNoDataTextSeat')"
       :footer-props="{
@@ -28,11 +32,13 @@
           <td>{{ row.item.department }}</td>
           <td>{{ row.item.number }}</td>
           <td>
-            <v-icon
-              large
+            <v-btn
+              outlined
+              color="#2c4f91"
+              style="height: 30px; font-size: 12px"
               id="showSeatButton"
               @click="showSeatButtonClicked(row.item)"
-              >event_seat</v-icon
+              >{{ $t("findSeat") }}</v-btn
             >
           </td>
         </tr>

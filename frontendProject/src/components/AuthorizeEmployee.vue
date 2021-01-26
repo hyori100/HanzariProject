@@ -115,10 +115,10 @@
           </v-col>
           <v-col class="text-right">
             <v-btn x-large @click="cancelAuthorizeEmployee">{{
-              this.$i18n.t("btnCancelAuthorizeEmployee")
+              this.$i18n.t("btnCancel")
             }}</v-btn>
             <v-btn color="primary" x-large @click="confirmAuthorizeEmployee">{{
-              this.$i18n.t("btnConfirmAuthorizeEmployee")
+              this.$i18n.t("btnConfirm")
             }}</v-btn>
           </v-col>
         </v-row>
@@ -139,7 +139,7 @@ import i18n from "../plugins/i18n.js";
 
 import ProgressDialog from "@/components/ProgressDialog.vue";
 
-const HOST = "http://149.28.141.163:8080";
+const HOST = "http://172.30.6.192:8080";
 
 const Authority = {
   Viewer: "뷰어",
@@ -158,8 +158,16 @@ export default {
       authorityList: [Authority.Viewer, Authority.Admin, Authority.Manager],
 
       //왼쪽,오른쪽 상단의 콤보박스 아이템 리스트
-      leftComboBoxItemList: [Authority.Viewer, Authority.Admin, Authority.Manager],
-      afterComboBoxItemList: [Authority.Viewer, Authority.Admin, Authority.Manager],
+      leftComboBoxItemList: [
+        Authority.Viewer,
+        Authority.Admin,
+        Authority.Manager,
+      ],
+      afterComboBoxItemList: [
+        Authority.Viewer,
+        Authority.Admin,
+        Authority.Manager,
+      ],
 
       //데이터테이블에 필요한 값
       headers: [
@@ -208,12 +216,15 @@ export default {
           //오른쪽 데이터테이블에서 선택된 사원이 있다면
           if (this.rightDataTableSelectedItemList.length > 0) {
             //!!체크 해제 해달라는 알림창!! 띄워주고 리스트 초기화
-            this.$notify({
-              group: "notifyApp",
-              type: "warn",
-              duration: 5000,
+            this.$notice.info({
               title: this.$i18n.t("alertRemoveCheckRightTable"),
-              ignoreDuplicates: true,
+              styles: {
+                width: "400px",
+                marginLeft: "-815px",
+                top: "118px",
+                backgroundColor: "#2a88bd",
+              },
+              duration: 5,
             });
             this.leftDataTableSelectedItemList = [];
             this.moveEmployeeToRightBtnStatus = false;
@@ -233,12 +244,15 @@ export default {
           //왼쪽 데이터테이블에서 선택된 사원이 있다면
           if (this.leftDataTableSelectedItemList.length > 0) {
             //!!체크 해제 해달라는 알림창!! 띄워주고 리스트 초기화
-            this.$notify({
-              group: "notifyApp",
-              type: "warn",
-              duration: 5000,
+            this.$notice.info({
               title: this.$i18n.t("alertRemoveCheckLeftTable"),
-              ignoreDuplicates: true,
+              styles: {
+                width: "400px",
+                marginLeft: "-815px",
+                top: "118px",
+                backgroundColor: "#2a88bd",
+              },
+              duration: 5,
             });
             this.rightDataTableSelectedItemList = [];
             this.moveEmployeeToLeftBtnStatus = false;
@@ -405,7 +419,9 @@ export default {
               this.rightComboBoxSelectString
             );
             rightAuthorityList.splice(
-              rightAuthorityList.indexOf(this.rightDataTableSelectedItemList[i]),
+              rightAuthorityList.indexOf(
+                this.rightDataTableSelectedItemList[i]
+              ),
               1
             );
           }
@@ -423,7 +439,9 @@ export default {
               this.rightComboBoxSelectString
             );
             rightAuthorityList.splice(
-              rightAuthorityList.indexOf(this.rightDataTableSelectedItemList[i]),
+              rightAuthorityList.indexOf(
+                this.rightDataTableSelectedItemList[i]
+              ),
               1
             );
           }
@@ -441,7 +459,9 @@ export default {
               this.rightComboBoxSelectString
             );
             rightAuthorityList.splice(
-              rightAuthorityList.indexOf(this.rightDataTableSelectedItemList[i]),
+              rightAuthorityList.indexOf(
+                this.rightDataTableSelectedItemList[i]
+              ),
               1
             );
           }
@@ -514,46 +534,46 @@ export default {
     },
     //초기화 버튼을 누를시
     resetAuthorizeEmployee() {
-        let message = {
-          title: this.$i18n.t("titleConfirmReset"),
-          body: this.$i18n.t("confirmReset"),
-        };
-        let options = {
-          html: true,
-          okText: this.$i18n.t("btnConfirm"),
-          cancelText: this.$i18n.t("btnCancel"),
-        };
-        this.$dialog
-          .confirm(message, options)
-          .then((dialog) => {
-            //console.log("ok");
-            //데이터테이블에서 체크된 것들 모두 초기화하기
-            this.leftDataTableSelectedItemList = [];
-            this.rightDataTableSelectedItemList = [];
+      let message = {
+        title: this.$i18n.t("titleConfirmReset"),
+        body: this.$i18n.t("confirmReset"),
+      };
+      let options = {
+        html: true,
+        okText: this.$i18n.t("btnConfirm"),
+        cancelText: this.$i18n.t("btnCancel"),
+      };
+      this.$dialog
+        .confirm(message, options)
+        .then((dialog) => {
+          //console.log("ok");
+          //데이터테이블에서 체크된 것들 모두 초기화하기
+          this.leftDataTableSelectedItemList = [];
+          this.rightDataTableSelectedItemList = [];
 
-            //모든 리스트 초기화하기
-            this.rightDataTableEmployeeList = [];
-            this.leftDataTableEmployeeList = [];
-            this.viewerEmployeeList = [];
-            this.adminEmployeeList = [];
-            this.managerEmployeeList = [];
+          //모든 리스트 초기화하기
+          this.rightDataTableEmployeeList = [];
+          this.leftDataTableEmployeeList = [];
+          this.viewerEmployeeList = [];
+          this.adminEmployeeList = [];
+          this.managerEmployeeList = [];
 
-            //관리자/매니저/뷰어 사원리스트를 다시 넣어주기
-            this.pushEmployeeToListByAuthority("viewer");
-            this.pushEmployeeToListByAuthority("admin");
-            this.pushEmployeeToListByAuthority("manager");
+          //관리자/매니저/뷰어 사원리스트를 다시 넣어주기
+          this.pushEmployeeToListByAuthority("viewer");
+          this.pushEmployeeToListByAuthority("admin");
+          this.pushEmployeeToListByAuthority("manager");
 
-            //현재 선택되어있는 콤보박스의 권한에 따른 사원리스트를 데이터테이블에 각각 보여지게 하기
-            this.rightDataTableEmployeeList = this.getEmployeeListByAuthority(
-              this.rightComboBoxSelectString
-            );
-            this.leftDataTableEmployeeList = this.getEmployeeListByAuthority(
-              this.leftComboBoxSelectString
-            );
-          })
-          .catch(() => {
-            //console.log("cancel");
-          });
+          //현재 선택되어있는 콤보박스의 권한에 따른 사원리스트를 데이터테이블에 각각 보여지게 하기
+          this.rightDataTableEmployeeList = this.getEmployeeListByAuthority(
+            this.rightComboBoxSelectString
+          );
+          this.leftDataTableEmployeeList = this.getEmployeeListByAuthority(
+            this.leftComboBoxSelectString
+          );
+        })
+        .catch(() => {
+          //console.log("cancel");
+        });
     },
     //API를 호출해서 권한을 변경시켜야할 사원들만 추출하기
     pushEmployeeListToChangeAuthorityList(authority) {
@@ -568,9 +588,14 @@ export default {
       }
 
       for (let i = 0; i < employeeListByAuthority.length; i++) {
-        const idx = this.$store.state.getStore.allEmployee.findIndex((employeeObject) => {
-          return employeeObject.employeeId === employeeListByAuthority[i].employeeId;
-        });
+        const idx = this.$store.state.getStore.allEmployee.findIndex(
+          (employeeObject) => {
+            return (
+              employeeObject.employeeId ===
+              employeeListByAuthority[i].employeeId
+            );
+          }
+        );
         if (idx > -1) {
           if (
             this.$store.state.getStore.allEmployee[idx].authority !==
@@ -630,12 +655,16 @@ export default {
         saveData.employeeId = employeeListWithAuthority[i].employeeId;
         try {
           response = await axios
-            .post(HOST + "/api/employee/changeAuthority", JSON.stringify(saveData), {
-              headers: {
-                "Content-Type": `application/json`,
-                "X-AUTH-TOKEN": this.$store.state.userStore.token,
-              },
-            })
+            .post(
+              HOST + "/api/employee/changeAuthority",
+              JSON.stringify(saveData),
+              {
+                headers: {
+                  "Content-Type": `application/json`,
+                  "X-AUTH-TOKEN": this.$store.state.userStore.token,
+                },
+              }
+            )
             .catch((error) => {
               errorStatus = error.response.status;
               console.log("에러 상태: " + errorStatus);

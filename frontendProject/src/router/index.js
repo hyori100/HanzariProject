@@ -8,7 +8,8 @@ import SuperHanzari from '@/views/SuperHanzari'
 import ManagerHanzari from '@/views/ManagerHanzari'
 import ViewerHanzari from '@/views/ViewerHanzari'
 import Login from '@/views/Login'
-import MyPageAfterLogin from '@/views/MyPageAfterLogin'
+import AdminMyPage from '@/views/AdminMyPage'
+import MyPage from '@/views/MyPage'
 
 Vue.use(Router)
 Vue.use(fabric)
@@ -80,6 +81,10 @@ const enterMyPage = () => (to, from, next) => {
 
   if (store.state.userStore.authority === "super") {
     next('/SuperHanzari');
+  } else if (store.state.userStore.authority === "admin") {
+    next('/AdminMyPage');
+  } else {
+    next('/MyPage');
   }
 }
 
@@ -93,9 +98,15 @@ export default new Router({
       beforeEnter: doNotRequireAuth()
     },
     {
-      path: '/myPage',
-      name: 'myPage',
-      component: MyPageAfterLogin,
+      path: '/AdminMyPage',
+      name: 'AdminMyPage',
+      component: AdminMyPage,
+      beforeEnter: enterMyPage()
+    },
+    {
+      path: '/MyPage',
+      name: 'MyPage',
+      component: MyPage,
       beforeEnter: enterMyPage()
     },
     {

@@ -1,20 +1,64 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="floorInformationlist"
-    :items-per-page="15"
-    height="400px"
-    item-key="name"
-    class="elevation-1"
-    :footer-props="{
-      showFirstLastPage: true,
-      firstIcon: 'mdi-arrow-collapse-left',
-      lastIcon: 'mdi-arrow-collapse-right',
-      prevIcon: 'mdi-minus',
-      nextIcon: 'mdi-plus',
-      'items-per-page-text': $t('dataTabelPerPageTextSeat'),
-    }"
-  ></v-data-table>
+  <v-card flat>
+    <v-card-title>
+      <div class="mx-1"></div>
+      <h4>{{ currentSelectedFloorName }}{{ $t("floor") }}</h4>
+    </v-card-title>
+    <div class="mx-3">
+      <v-data-table
+        :headers="headers"
+        :items="floorInformationlist"
+        height="700px"
+        item-key="name"
+        class="elevation-1"
+        :no-data-text="$t('dataTabelNoDataTextEmployee')"
+        :footer-props="{
+          'items-per-page-text': $t('dataTabelPerPageTextSeat'),
+        }"
+      >
+        <template v-slot:item="row">
+          <tr>
+            <td>
+              {{ row.item.name }}
+            </td>
+            <td>
+              <v-btn
+                id="changeColorButton"
+                elevation="2"
+                v-if="
+                  userAuthority === 'admin' &&
+                  row.item.name != '전체' &&
+                  row.item.name != '공석'
+                "
+                fab
+                x-small
+                :color="getChipColor(row.item.name)"
+                @click="changeColorButtonClicked(row.item.name)"
+              >
+                <v-icon
+                  :color="getChipTextColor(getChipColor(row.item.name))"
+                  medium
+                  >sync</v-icon
+                >
+              </v-btn>
+            </td>
+            <td>{{ row.item.number }}</td>
+            <td>
+              <v-btn
+                v-if="row.item.name != '전체' && row.item.number > 0"
+                outlined
+                color="#2c4f91"
+                style="height: 30px; font-size: 12px"
+                id="showSeatButton"
+                @click="showSeatButtonClicked(row.item.name)"
+                >{{ $t("findSeat") }}</v-btn
+              >
+            </td>
+          </tr>
+        </template>
+      </v-data-table>
+    </div>
+  </v-card>
 </template>
 
 <script>
@@ -24,10 +68,13 @@ export default {
   name: "FlowInformationTable",
   data() {
     return {
+      userAuthority: null,
+
       allFloorList: null,
       allSeatMap: null,
 
       currentSelectedFloorId: null,
+      currentSelectedFloorName: null,
       allFloorIdList: [],
 
       latestFloorSeatList: this.$store.state.getStore.latestFloorSeatList,
@@ -37,24 +84,53 @@ export default {
 
       headers: [
         { text: this.$i18n.t("headersDivision"), value: "name" },
+        { text: "", value: "changeColorButton" },
         { text: this.$i18n.t("headersNumberOfSeat"), value: "number" },
+        { text: "", value: "showSeatButton" },
       ],
 
       floorSeatsNumber: 0,
       floorVacantSeatsNumber: 0,
+
+      currentFloorDepartmentList: [],
+      allDepartmentObjectList: this.$store.state.getStore.allDepartment,
+      departmentMap: null,
+      departmentColor: null,
     };
   },
   created() {
+    this.userAuthority = this.$store.state.userStore.authority;
+
     this.allSeatMap = new Map();
+    if (this.departmentMap === null) {
+      this.departmentMap = new Map();
+    }
 
     //층 변할때 그 층에 맞는 현황표 보여주기 위함
     eventBus.$on("pushSelectedFloorObject", (floorObject) => {
       if (floorObject) {
+        this.currentSelectedFloorName = floorObject.floorName;
         this.currentSelectedFloorId = floorObject.floorId;
         this.getFloorInformation();
+
+        this.currentFloorDepartmentList = [];
+        this.currentFloorDepartmentList = this.departmentMap.get(
+          this.currentSelectedFloorId
+        );
       } else {
         this.currentSelectedFloorId = null;
+        this.currentSelectedFloorName = null;
+        this.currentFloorDepartmentList = [];
       }
+    });
+
+    eventBus.$on("pushDepartmentMap", (departmentMap) => {
+      this.departmentMap = departmentMap;
+
+      this.currentFloorDepartmentList = [];
+      this.currentFloorDepartmentList = departmentMap.get(
+        this.currentSelectedFloorId
+      );
     });
 
     //현황표 변경되었을때
@@ -76,6 +152,7 @@ export default {
         this.$store.state.getStore.allFloor.length - 1
       ];
       this.currentSelectedFloorId = currentFloorObject.floorId;
+      this.currentSelectedFloorName = currentFloorObject.floorName;
 
       this.allFloorList = this.$store.state.getStore.allFloor;
 
@@ -104,11 +181,71 @@ export default {
   beforeDestroy() {
     eventBus.$off("pushSelectedFloorObject");
     eventBus.$off("pushAllSeatMap");
+    eventBus.$off("pushDepartmentMap");
   },
   mounted() {
     this.getFloorInformation();
   },
   methods: {
+    getChipColor(name) {
+      let chipColor = null;
+
+      if (name === this.$i18n.t("textAllSeat")) {
+        chipColor = "#ffffff";
+      }
+
+      if (this.currentFloorDepartmentList) {
+        for (let i = 0; i < this.currentFloorDepartmentList.length; i++) {
+          if (name === this.currentFloorDepartmentList[i].departmentName) {
+            chipColor = this.currentFloorDepartmentList[i].departmentColor;
+          }
+        }
+      }
+      return chipColor;
+    },
+    discriminateLightOrDark(color) {
+      console.log(color);
+      if (color) {
+        let r = null;
+        let g = null;
+        let b = null;
+        let hsp = null;
+
+        if (color.match(/^rgb/)) {
+          color = color.match(
+            /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/
+          );
+
+          r = color[1];
+          g = color[2];
+          b = color[3];
+        } else {
+          color = +(
+            "0x" + color.slice(1).replace(color.length < 5 && /./g, "$&$&")
+          );
+
+          r = color >> 16;
+          g = (color >> 8) & 255;
+          b = color & 255;
+        }
+
+        hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
+
+        if (hsp > 127.5) {
+          return "light";
+        } else {
+          return "dark";
+        }
+      }
+    },
+    getChipTextColor(departmentColor) {
+      let darkness = this.discriminateLightOrDark(departmentColor);
+      if (darkness === "light") {
+        return "black";
+      } else {
+        return "white";
+      }
+    },
     initFloorInformation() {
       this.floorInformationlist = [];
 
@@ -131,7 +268,9 @@ export default {
           this.floorSeatsNumber = 0;
           this.floorVacantSeatsNumber = 0;
           if (this.allSeatMap.get(this.currentSelectedFloorId).length > 0) {
-            let floorSeatList = this.allSeatMap.get(this.currentSelectedFloorId);
+            let floorSeatList = this.allSeatMap.get(
+              this.currentSelectedFloorId
+            );
             let floorSeatsLength = floorSeatList.length;
             let floorVacantSeatsLength = 0;
 
@@ -192,6 +331,28 @@ export default {
           this.floorInformationlist.push(departmentList[i]);
         }
       }
+    },
+    showSeatButtonClicked(departmentName) {
+      let departmentObjectId = null;
+      for (let i = 0; i < this.currentFloorDepartmentList.length; i++) {
+        if (
+          departmentName === this.currentFloorDepartmentList[i].departmentName
+        ) {
+          departmentObjectId = this.currentFloorDepartmentList[i].departmentId;
+        }
+      }
+      eventBus.$emit("showDepartmentSeatHighlight", departmentObjectId);
+    },
+    changeColorButtonClicked(departmentName) {
+      let departmentObjectId = null;
+      for (let i = 0; i < this.currentFloorDepartmentList.length; i++) {
+        if (
+          departmentName === this.currentFloorDepartmentList[i].departmentName
+        ) {
+          departmentObjectId = this.currentFloorDepartmentList[i].departmentId;
+        }
+      }
+      eventBus.$emit("changeDepartmentColor", departmentObjectId);
     },
   },
 };

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <v-toolbar color="black" dark> </v-toolbar>
+    <v-toolbar color="#2c4f91" dark :height="30"> </v-toolbar>
     <v-tabs
       v-model="tab"
-      background-color="black"
+      background-color="#2c4f91"
       dark
       height="65"
       horizontal
@@ -11,7 +11,7 @@
     >
       <v-tabs-slider color="blue"></v-tabs-slider>
       <v-tab v-for="item in items" :key="item.index">
-        <v-icon large dark>{{ item.icon }}</v-icon></v-tab
+        <v-icon size="30px" dark>{{ item.icon }}</v-icon></v-tab
       >
     </v-tabs>
 
@@ -21,6 +21,9 @@
           <v-card-text>
             <component
               v-bind:is="item.content"
+              :manageSeatTabOfSelectedSeatsComponentStatusToManageSeats="
+                manageSeatTabOfSelectedSeatsComponentStatusToManageSeats
+              "
               :eachEmployeeSeatMapToManageSearch="
                 eachEmployeeSeatMapToManageSearch
               "
@@ -28,6 +31,8 @@
               :selectedFloorObjectToManageSeats="
                 selectedFloorObjectToManageSeats
               "
+              :seatDragWidthToManageSeats="seatDragWidth"
+              :seatDragHeightToManageSeats="seatDragHeight"
             ></component>
           </v-card-text>
         </v-card>
@@ -50,11 +55,17 @@ export default {
   },
   data() {
     return {
-      tab: null,
+      tab: 0,
+
+      manageSeatTabOfSelectedSeatsComponentStatusToManageSeats: false,
 
       eachEmployeeSeatMapToManageSearch: null,
       allFloorListToManageSeats: null,
       selectedFloorObjectToManageSeats: null,
+
+      //드래그 자리 사이즈,
+      seatDragHeight: null,
+      seatDragWidth: null,
 
       items: [
         {
@@ -79,6 +90,17 @@ export default {
     };
   },
   created() {
+    //초기에 두번째 탭 선택 안했을때도 선택한 자리에 대해서 뜨는 탭을 보여지게 하기 위함
+    eventBus.$on(
+      "pushManageSeatTabOfSelectedSeatsComponentStatus",
+      (manageSeatTabOfSelectedSeatsComponentStatus) => {
+        this.manageSeatTabOfSelectedSeatsComponentStatusToManageSeats = manageSeatTabOfSelectedSeatsComponentStatus;
+        if (manageSeatTabOfSelectedSeatsComponentStatus) {
+          this.tab = 1;
+        }
+        console.log(manageSeatTabOfSelectedSeatsComponentStatus);
+      }
+    );
     //매핑된 사원 추가시 검색 탭으로 사원 맵 받기 위한 event
     eventBus.$on("pushEachEmployeeSeatMap", (eachEmployeeSeatMap) => {
       this.eachEmployeeSeatMapToManageSearch = eachEmployeeSeatMap;
@@ -93,8 +115,19 @@ export default {
     eventBus.$on("pushSelectedFloorObject", (floorObject) => {
       this.selectedFloorObjectToManageSeats = floorObject;
     });
+
+    eventBus.$on("sendDragSeatInformation", (objWidth, objHeight) => {
+      console.log(objWidth + "22222" + objHeight);
+      this.seatDragWidth = objWidth;
+      this.seatDragHeight = objHeight;
+    });
+
+    eventBus.$on("sendDragMultipleSeatList", (objWidthList, objHeightList) => {
+      console.log(objWidthList + "!!!!!!!!!!!!" + objHeightList);
+    });
   },
   beforeDestroy() {
+    eventBus.$off("pushManageSeatTabOfSelectedSeatsComponentStatus");
     eventBus.$off("pushEachEmployeeSeatMap");
     eventBus.$off("pushAllFloorList");
     eventBus.$off("pushSelectedFloorObject");

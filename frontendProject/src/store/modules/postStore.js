@@ -1,7 +1,7 @@
 import axios from "axios";
 import { refreshToken } from '../../refreshToken.js'
 
-const HOST = "http://149.28.141.163:8080";
+const HOST = "http://172.30.6.192:8080";
 
 const postStore = {
     state: {
@@ -45,6 +45,56 @@ const postStore = {
         },
     },
     actions: {
+        async saveBuilding({rootState}, newBuilding) {
+            console.log("save 빌딩 호출")
+            let saveBuilding = {}
+            saveBuilding.building_id = newBuilding.buildingId
+            saveBuilding.building_name = newBuilding.buildingName
+            let errorStatus = null;
+            try {
+                await axios
+                    .post(
+                        HOST +
+                        "/api/buildings",
+                        JSON.stringify(saveBuilding),
+                        {
+                            headers: {
+                                "Content-Type": `application/json`,
+                                "X-AUTH-TOKEN": rootState.userStore.token,
+                            },
+                        }
+                    )
+                    .then(function (response) {
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        errorStatus = error.response.status
+                        console.log(errorStatus)
+                    });
+                if (errorStatus === 401) {
+                    await refreshToken();
+                    console.log("!!!새로 발급 받은 토큰 입니다!!!")
+                    console.log(rootState.userStore.token);
+                    await axios
+                        .post(
+                            HOST +
+                            "/api/buildings",
+                            JSON.stringify(saveBuilding),
+                            {
+                                headers: {
+                                    "Content-Type": `application/json`,
+                                    "X-AUTH-TOKEN": rootState.userStore.token,
+                                },
+                            }
+                        )
+                        .then(function (response) {
+                            console.log(response);
+                        })
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        },
         async pushFloors({ commit, state }, allFloorList) {
             console.log("save 층 리스트 push 호출")
             console.log(allFloorList.length)
@@ -195,12 +245,12 @@ const postStore = {
             for (let j = 0; j < saveDepartmentList.length; j++) {
                 let departmentData = {};
                 departmentData.department_color =
-                saveDepartmentList[j].departmentColor;
+                    saveDepartmentList[j].departmentColor;
                 departmentData.department_headcount = 0;
                 departmentData.department_id =
-                saveDepartmentList[j].departmentId;
+                    saveDepartmentList[j].departmentId;
                 departmentData.department_name =
-                saveDepartmentList[j].departmentName;
+                    saveDepartmentList[j].departmentName;
                 commit("PUSH_DEPTLIST", departmentData)
             }
 

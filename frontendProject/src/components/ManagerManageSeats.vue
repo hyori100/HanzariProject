@@ -61,7 +61,7 @@ import { eventBus } from "../main";
 import axios from "axios";
 import { refreshToken } from "@/refreshToken.js";
 
-const HOST = "http://149.28.141.163:8080";
+const HOST = "http://172.30.6.192:8080";
 
 export default {
   name: "ManagerManageSeats",

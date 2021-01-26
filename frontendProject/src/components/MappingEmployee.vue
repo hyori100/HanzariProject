@@ -15,12 +15,11 @@
         :headers="headers"
         :items="this.$store.state.getStore.allEmployee"
         :search="search"
-        height="400px"
+        height="700px"
         class="elevation-1"
         :no-data-text="$t('dataTabelNoDataTextEmployee')"
         :footer-props="{
           'items-per-page-text': $t('dataTabelPerPageTextEmployee'),
-          'items-per-page-options': [5, 10],
         }"
       >
         <template v-slot:item="row">
@@ -29,11 +28,13 @@
             <td>{{ row.item.department }}</td>
             <td>{{ row.item.number }}</td>
             <td>
-              <v-icon
-                large
+              <v-btn
+                outlined
+                color="#2c4f91"
+                style="height: 30px; font-size: 12px"
                 id="mappingEmployeeToVacantButton"
                 @click="clickEmployeeToMapping(row.item)"
-                >add_box</v-icon
+                >{{ $t("mapping") }}</v-btn
               >
             </td>
           </tr>
@@ -56,7 +57,12 @@ export default {
     return {
       search: "",
       headers: [
-        { text: this.$i18n.t("textName"), align: "start", sortable: true, value: "name" },
+        {
+          text: this.$i18n.t("textName"),
+          align: "start",
+          sortable: true,
+          value: "name",
+        },
         { text: this.$i18n.t("textDept"), value: "department" },
         { text: this.$i18n.t("textNumber"), value: "number" },
         { text: "", value: "mappingEmployeeToVacantButton" },

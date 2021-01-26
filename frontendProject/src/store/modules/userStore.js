@@ -5,7 +5,8 @@ const userStore = {
         token: '',
         refresh_token: '',
         authority: '',
-        employeeId : '',
+        employeeId: '',
+        employeeName: ''
     },
     mutations: {
         login: function (state, payload) {
@@ -13,8 +14,11 @@ const userStore = {
             state.refresh_token = payload.refresh_token
             state.authority = payload.authority
         },
-        saveEmployeeId: function (state, payload) {
+        setEmployeeId: function (state, payload) {
             state.employeeId = payload
+        },
+        setEmployeeName: function (state, payload) {
+            state.employeeName = payload
         },
         setToken: function (state, payload) {
             state.token = payload.access_token
@@ -25,6 +29,7 @@ const userStore = {
                 state.refresh_token = ''
                 state.authority = ''
                 state.employeeId = ''
+                state.employeeName = ''
             }
         },
         loginCheck: function (state) {

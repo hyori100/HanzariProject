@@ -1,14 +1,12 @@
 <template>
   <v-app id="app">
-    <v-app-bar app dark>
-      <v-toolbar color="black" dark>
-        <v-toolbar-title>{{ $t("superMypageTitle") }}</v-toolbar-title>
-        <v-spacer />
-        <v-btn text @click="logout">{{ $t("logout") }}</v-btn>
-      </v-toolbar>
+    <v-app-bar app color="#2c4f91" dark flat :height="30">
+      <v-toolbar-title>{{ $t("superMypageTitle") }}</v-toolbar-title>
+      <v-spacer />
+      <v-btn text @click="logout">{{ $t("logout") }}</v-btn>
     </v-app-bar>
     <v-main>
-      <v-card flat color="transparent">
+      <v-card flat color="transparent" style="margin: 50px">
         <v-row v-if="this.$store.state.getStore.allEmployee" class="mx-auto">
           <v-col cols="12" sm="5">
             <v-row>
@@ -117,17 +115,24 @@
           </v-col>
           <v-row>
             <v-col class="text-left">
-              <v-btn color="error" x-large @click="resetAuthorizeEmployee">{{
-                this.$i18n.t("btnResetAuthorizeEmployee")
-              }}</v-btn>
+              <v-btn
+                style="height: 30px; font-size: 12px; margin-left: 10px"
+                @click="resetAuthorizeEmployee"
+                >{{ this.$i18n.t("btnResetAuthorizeEmployee") }}</v-btn
+              >
             </v-col>
             <v-col class="text-right">
-              <v-btn x-large @click="cancelAuthorizeEmployee">{{
-                this.$i18n.t("btnCancelAuthorizeEmployee")
-              }}</v-btn>
-              <v-btn color="primary" x-large @click="confirmAuthorizeEmployee">{{
-                this.$i18n.t("btnConfirmAuthorizeEmployee")
-              }}</v-btn>
+              <v-btn
+                color="#2c4f91"
+                style="
+                  margin-right : 10px
+                  height: 30px;
+                  color: white;
+                  font-size: 12px;
+                "
+                @click="confirmAuthorizeEmployee"
+                >{{ this.$i18n.t("btnConfirm") }}</v-btn
+              >
             </v-col>
           </v-row>
         </v-row>
@@ -148,7 +153,7 @@ import i18n from "../plugins/i18n.js";
 
 import ProgressDialog from "@/components/ProgressDialog.vue";
 
-const HOST = "http://149.28.141.163:8080";
+const HOST = "http://172.30.6.192:8080";
 
 const Authority = {
   Viewer: "뷰어",
@@ -167,8 +172,16 @@ export default {
       authorityList: [Authority.Viewer, Authority.Admin, Authority.Manager],
 
       //왼쪽,오른쪽 상단의 콤보박스 아이템 리스트
-      leftComboBoxItemList: [Authority.Viewer, Authority.Admin, Authority.Manager],
-      afterComboBoxItemList: [Authority.Viewer, Authority.Admin, Authority.Manager],
+      leftComboBoxItemList: [
+        Authority.Viewer,
+        Authority.Admin,
+        Authority.Manager,
+      ],
+      afterComboBoxItemList: [
+        Authority.Viewer,
+        Authority.Admin,
+        Authority.Manager,
+      ],
 
       //데이터테이블에 필요한 값
       headers: [
@@ -217,12 +230,15 @@ export default {
           //오른쪽 데이터테이블에서 선택된 사원이 있다면
           if (this.rightDataTableSelectedItemList.length > 0) {
             //!!체크 해제 해달라는 알림창!! 띄워주고 리스트 초기화
-            this.$notify({
-              group: "notifyApp",
-              type: "warn",
-              duration: 5000,
+            this.$notice.info({
               title: this.$i18n.t("alertRemoveCheckRightTable"),
-              ignoreDuplicates: true,
+              styles: {
+                width: "400px",
+                marginLeft: "-835px",
+                top: "290px",
+                backgroundColor: "#2a88bd",
+              },
+              duration: 5,
             });
             this.leftDataTableSelectedItemList = [];
             this.moveEmployeeToRightBtnStatus = false;
@@ -242,12 +258,15 @@ export default {
           //왼쪽 데이터테이블에서 선택된 사원이 있다면
           if (this.leftDataTableSelectedItemList.length > 0) {
             //!!체크 해제 해달라는 알림창!! 띄워주고 리스트 초기화
-            this.$notify({
-              group: "notifyApp",
-              type: "warn",
-              duration: 5000,
+            this.$notice.warning({
               title: this.$i18n.t("alertRemoveCheckLeftTable"),
-              ignoreDuplicates: true,
+              styles: {
+                width: "400px",
+                marginLeft: "-835px",
+                top: "290px",
+                backgroundColor: "#2a88bd",
+              },
+              duration: 5,
             });
             this.rightDataTableSelectedItemList = [];
             this.moveEmployeeToLeftBtnStatus = false;
@@ -312,7 +331,11 @@ export default {
 
       if (this.$store.state.getStore.allEmployee) {
         //DB로부터 로드해온 사원리스트를 권한별로 관리자/매니저/뷰어 사원리스트에 차례대로 담기
-        for (let i = 0; i < this.$store.state.getStore.allEmployee.length; i++) {
+        for (
+          let i = 0;
+          i < this.$store.state.getStore.allEmployee.length;
+          i++
+        ) {
           let employeeObject = this.$store.state.getStore.allEmployee[i];
           if (employeeObject.authority == authority) {
             employeeListByAuthority.push(employeeObject);
@@ -416,7 +439,9 @@ export default {
               this.rightComboBoxSelectString
             );
             rightAuthorityList.splice(
-              rightAuthorityList.indexOf(this.rightDataTableSelectedItemList[i]),
+              rightAuthorityList.indexOf(
+                this.rightDataTableSelectedItemList[i]
+              ),
               1
             );
           }
@@ -434,7 +459,9 @@ export default {
               this.rightComboBoxSelectString
             );
             rightAuthorityList.splice(
-              rightAuthorityList.indexOf(this.rightDataTableSelectedItemList[i]),
+              rightAuthorityList.indexOf(
+                this.rightDataTableSelectedItemList[i]
+              ),
               1
             );
           }
@@ -452,7 +479,9 @@ export default {
               this.rightComboBoxSelectString
             );
             rightAuthorityList.splice(
-              rightAuthorityList.indexOf(this.rightDataTableSelectedItemList[i]),
+              rightAuthorityList.indexOf(
+                this.rightDataTableSelectedItemList[i]
+              ),
               1
             );
           }
@@ -580,9 +609,14 @@ export default {
       }
 
       for (let i = 0; i < employeeListByAuthority.length; i++) {
-        const idx = this.$store.state.getStore.allEmployee.findIndex((employeeObject) => {
-          return employeeObject.employeeId === employeeListByAuthority[i].employeeId;
-        });
+        const idx = this.$store.state.getStore.allEmployee.findIndex(
+          (employeeObject) => {
+            return (
+              employeeObject.employeeId ===
+              employeeListByAuthority[i].employeeId
+            );
+          }
+        );
         if (idx > -1) {
           if (
             this.$store.state.getStore.allEmployee[idx].authority !==
@@ -603,34 +637,29 @@ export default {
     //확인 버튼을 누를시
     //권한이 변경된 것만 API를 호출하도록 하기
     confirmAuthorizeEmployee() {
-        let message = {
-          title:  this.$i18n.t("titleConfirmAuthorize"),
-          body: this.$i18n.t("confirmAuthorize")
-        };
-        let options = {
-          html: true,
-          okText: this.$i18n.t("btnConfirm"),
-          cancelText: this.$i18n.t("btnCancel"),
-        };
-        this.$dialog
-          .confirm(message, options)
-          .then((dialog) => {
-            //console.log("ok");
-            this.pushEmployeeListToChangeAuthorityList("admin");
-            this.pushEmployeeListToChangeAuthorityList("manager");
-            this.pushEmployeeListToChangeAuthorityList("viewer");
+      let message = {
+        title: this.$i18n.t("titleConfirmAuthorize"),
+        body: this.$i18n.t("confirmAuthorize"),
+      };
+      let options = {
+        html: true,
+        okText: this.$i18n.t("btnConfirm"),
+        cancelText: this.$i18n.t("btnCancel"),
+      };
+      this.$dialog
+        .confirm(message, options)
+        .then((dialog) => {
+          //console.log("ok");
+          this.pushEmployeeListToChangeAuthorityList("admin");
+          this.pushEmployeeListToChangeAuthorityList("manager");
+          this.pushEmployeeListToChangeAuthorityList("viewer");
 
-            console.log(this.employeeListToChangeAuthority);
-            this.changeAuthority(this.employeeListToChangeAuthority);
-          })
-          .catch(() => {
-            //console.log("cancel");
-          });
-    },
-
-    //취소 버튼을 누를시
-    cancelAuthorizeEmployee() {
-      eventBus.$emit("pushAuthorizeStatus", false);
+          console.log(this.employeeListToChangeAuthority);
+          this.changeAuthority(this.employeeListToChangeAuthority);
+        })
+        .catch(() => {
+          //console.log("cancel");
+        });
     },
     //권한을 변경하고자 axios 호출하기
     async changeAuthority(employeeListWithAuthority) {
@@ -642,21 +671,7 @@ export default {
         saveData.employeeId = employeeListWithAuthority[i].employeeId;
         try {
           response = await axios
-            .post(HOST + "/api/employee/changeAuthority", JSON.stringify(saveData), {
-              headers: {
-                "Content-Type": `application/json`,
-                "X-AUTH-TOKEN": this.$store.state.userStore.token,
-              },
-            })
-            .catch((error) => {
-              errorStatus = error.response.status;
-              console.log("에러 상태: " + errorStatus);
-            });
-          if (errorStatus === 401) {
-            await refreshToken();
-            console.log("!!!새로 발급 받은 토큰 입니다!!!");
-            console.log(this.$store.state.userStore.token);
-            response = await axios.post(
+            .post(
               HOST + "/api/employee/changeAuthority",
               JSON.stringify(saveData),
               {
@@ -665,7 +680,66 @@ export default {
                   "X-AUTH-TOKEN": this.$store.state.userStore.token,
                 },
               }
-            );
+            )
+            .catch((error) => {
+              errorStatus = error.response.status;
+              console.log("에러 상태: " + errorStatus);
+            })
+            .then((res) => {
+              if (res) {
+                if (res.status === 200) {
+                  //권한 변경 성공
+                  this.$notice.info({
+                    title: this.$i18n.t("alertSuccessChangeEmployeeAuthority"),
+                    styles: {
+                      width: "400px",
+                      marginLeft: "-815px",
+                      top: "118px",
+                      color: "red",
+                      backgroundColor: "#2a88bd",
+                    },
+                    duration: 5,
+                  });
+                  return;
+                }
+              }
+            });
+          if (errorStatus === 401) {
+            await refreshToken();
+            console.log("!!!새로 발급 받은 토큰 입니다!!!");
+            console.log(this.$store.state.userStore.token);
+            response = await axios
+              .post(
+                HOST + "/api/employee/changeAuthority",
+                JSON.stringify(saveData),
+                {
+                  headers: {
+                    "Content-Type": `application/json`,
+                    "X-AUTH-TOKEN": this.$store.state.userStore.token,
+                  },
+                }
+              )
+              .then((res) => {
+                if (res) {
+                  if (res.status === 200) {
+                    //권한 변경 성공
+                    this.$notice.info({
+                      title: this.$i18n.t(
+                        "alertSuccessChangeEmployeeAuthority"
+                      ),
+                      styles: {
+                        width: "400px",
+                        marginLeft: "-815px",
+                        top: "118px",
+                        color: "red",
+                        backgroundColor: "#2a88bd",
+                      },
+                      duration: 5,
+                    });
+                    return;
+                  }
+                }
+              });
           }
           console.log(response);
         } catch (error) {

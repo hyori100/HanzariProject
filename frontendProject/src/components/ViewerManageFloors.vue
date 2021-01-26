@@ -2,45 +2,37 @@
   <div>
     <v-card flat color="transparent">
       <v-row>
-        <v-col cols="12" sm="6">
-          <v-card-title
-            ><v-icon large>domain</v-icon>
-            <h3>{{ this.$t("textBuildingName") }}</h3></v-card-title
-          ></v-col
-        ><v-col cols="12" sm="6">
-          <v-card-text>{{
-            $store.state.buildingStore.building.buildingName
-          }}</v-card-text></v-col
-        ></v-row
-      >
-      <v-divider class="mx-4"></v-divider>
-      <v-row>
-        <v-col cols="12" sm="8">
-          <v-card-title
-            ><v-icon large>stairs</v-icon>
-            <h3>{{ $t("selectFloor") }}</h3></v-card-title
+        <v-col cols="12" sm="9">
+          <v-card-title>
+            <h4>{{ this.$t("textSelectFloor") }}</h4></v-card-title
           ></v-col
         ></v-row
       >
-      <v-row style="overflow-y: scroll; height: 180px">
-        <v-col
+      <div style="overflow-x: hidden; overflow-y: auto; height: 600px">
+        <v-row
           v-for="floorObject of this.allFloorList"
           :key="floorObject.floorId"
-          class="d-flex child-flex"
-          cols="4"
+          style="padding-left: 15px"
         >
-          <v-btn
-            large
-            @click="clickFloor(floorObject)"
-            :style="{
-              border: clickFloorIndexes.includes(floorObject.floorId)
-                ? 'thick solid black'
-                : '',
-            }"
-            ><h3>{{ floorObject.floorName }}</h3></v-btn
-          >
-        </v-col>
-      </v-row>
+          <v-col cols="11" style="flex: 0 0 93%; max-width: 93%">
+            <v-btn
+              block
+              large
+              @click="clickFloor(floorObject)"
+              :style="{
+                border: clickFloorIndexes.includes(floorObject.floorId)
+                  ? 'thick solid #2c4f91'
+                  : '',
+                fontWeight: clickFloorIndexes.includes(floorObject.floorId)
+                  ? 'bold'
+                  : '',
+                height: '45px',
+              }"
+              >{{ floorObject.floorName }}</v-btn
+            >
+          </v-col>
+        </v-row>
+      </div>
     </v-card>
   </div>
 </template>

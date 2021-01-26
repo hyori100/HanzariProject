@@ -1,9 +1,9 @@
 <template>
   <div>
-    <v-toolbar color="black" dark> </v-toolbar>
+    <v-toolbar color="#2c4f91" dark> </v-toolbar>
     <v-tabs
       v-model="tab"
-      background-color="black"
+      background-color="#2c4f91"
       dark
       height="65"
       horizontal
@@ -11,7 +11,7 @@
     >
       <v-tabs-slider color="blue"></v-tabs-slider>
       <v-tab v-for="item in items" :key="item.index">
-        <v-icon large dark>{{ item.icon }}</v-icon></v-tab
+        <v-icon size="30px" dark>{{ item.icon }}</v-icon></v-tab
       >
     </v-tabs>
 
@@ -21,7 +21,9 @@
           <v-card-text>
             <component
               v-bind:is="item.content"
-              :eachEmployeeSeatMapToManageSearch="eachEmployeeSeatMapToManageSearch"
+              :eachEmployeeSeatMapToManageSearch="
+                eachEmployeeSeatMapToManageSearch
+              "
             ></component>
           </v-card-text>
         </v-card>
