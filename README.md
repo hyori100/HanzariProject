@@ -27,44 +27,37 @@
 ## 주요 기능별 캡처
 
 1) 로그인 화면입니다.
-<br />
-
 ![1](https://github.com/user-attachments/assets/5449c2c7-0d27-4583-9f48-76c0d8058c4a)
+<br />
 
 2) 건물을 선택할 수 있는 화면입니다. 
-<br />
-
 ![2](https://github.com/user-attachments/assets/0907e04f-d8ef-4b70-87d4-ce17b3c8b945)
+<br />
 
 3) 층을 선택하여 도면을 확인할 수 있는 화면입니다. 
-<br />
-
 ![3](https://github.com/user-attachments/assets/3880f3dd-d8ae-4e58-b9b8-fc6ffa536954)
+<br />
 
 4) 자리 생성 시, 한 번에 몇 개씩/어떤 크기로 생성할 건지 선택 가능합니다.
-<br />
-
 ![4](https://github.com/user-attachments/assets/6bd09385-d56f-46dd-be56-b43d749b2e9e)
+<br />
 
 5) 자리를 선택하면 가능한 기능을 선택할 수 있습니다. (사원 매핑, 자리 비우기, 크기 조정, 층간/건물간 이동, 메모 작성)
-<br />
-
 ![5](https://github.com/user-attachments/assets/995923ed-8ebe-4a4b-aa23-03d33d03cac0)
+<br />
 
 6) 자리에 사원을 매핑할 수 있습니다.
-<br />
-
 ![6](https://github.com/user-attachments/assets/f49b6c9e-638b-4630-8635-9925aa817f55)
+<br />
 
 7) 자리 색상은 부서별로 다르게 표시됩니다.
-<br />
-
 ![7](https://github.com/user-attachments/assets/a66674b0-a5d3-4182-9f76-49f77f1975c4)
+<br />
 
 8) 사원을 검색하여 자리의 위치를 확인할 수 있습니다.
-<br />
-
 ![8](https://github.com/user-attachments/assets/5e5dd9bf-fd93-4bea-b6de-59978b2542e1)
+<br />
+<br />
 
 ## 프로젝트 Frontend 기술
 * Vue.js 프레임워크를 이용한 웹 어플리케이션 개발
